@@ -1,0 +1,1 @@
+cargo readme --no-badges --no-indent-headings --no-license --no-template --no-title > README.md
