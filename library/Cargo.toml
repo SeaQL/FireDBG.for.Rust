@@ -6,7 +6,9 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "FireDBG Support Library"
-authors = ["Chris Tsang <chris.2y3@outlook.com>"]
 rust-version = "1.72"
+authors = ["Chris Tsang <chris.2y3@outlook.com>"]
+homepage = "https://firedbg.sea-ql.org/"
+repository = "https://github.com/SeaQL/FireDBG.for.Rust"
 
 [dependencies]
