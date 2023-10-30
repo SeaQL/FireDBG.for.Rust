@@ -14,7 +14,7 @@ fn some_fn(v: i32) -> i32 {
 ```
 
 Which `fire::dbg!(v)` would expand to `__firedbg_trace__("v", v)` when compiled under debug mode.
-In release mode, it would expand to a unit expression, i.e. `{ v }`.
+In release mode, it would expand to an expression, i.e. `{ v }`.
 
 Note that the function passes through the ownership of the variable, like the [`std::dbg!`] macro.
 
