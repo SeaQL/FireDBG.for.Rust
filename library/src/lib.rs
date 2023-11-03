@@ -11,9 +11,14 @@
 //! fn some_fn(v: i32) -> i32 {
 //!     fire::dbg!(v) + 1
 //! }
+//! 
+//! fn other_fn(v: i32) -> i32 {
+//!     fire::dbg!("arg_v", v) + 1
+//! }
 //! ```
 //!
 //! Which `fire::dbg!(v)` would expand to `__firedbg_trace__("v", v)` when compiled under debug mode.
+//! The label could be customized with `fire::dbg!("arg_v", v)` would expand to `__firedbg_trace__("arg_v", v)` when compiled under debug mode.
 //! In release mode, it would expand to an expression, i.e. `{ v }`.
 //!
 //! Note that the function passes through the ownership of the variable, like the [`std::dbg!`] macro.
@@ -25,6 +30,9 @@ pub mod fire {
     #[macro_export]
     #[cfg(debug_assertions)]
     macro_rules! dbg {
+        ($t:expr, $v:expr) => {
+            firedbg_lib::__firedbg_trace__($t, $v);
+        };
         ($v:expr) => {
             firedbg_lib::__firedbg_trace__(std::stringify!($v), $v);
         };
@@ -33,6 +41,9 @@ pub mod fire {
     #[macro_export]
     #[cfg(not(debug_assertions))]
     macro_rules! dbg {
+        ($t:expr, $v:expr) => {{
+            $v
+        }};
         ($v:expr) => {{
             $v
         }};
