@@ -11,7 +11,7 @@
 //! fn some_fn(v: i32) -> i32 {
 //!     fire::dbg!(v) + 1
 //! }
-//! 
+//!
 //! fn other_fn(v: i32) -> i32 {
 //!     fire::dbg!("arg_v", v) + 1
 //! }
