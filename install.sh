@@ -117,6 +117,17 @@ get_architecture() {
     case "$_ostype" in
         Linux | linux)
             local _ostype=linux
+            if check_cmd lsb_release; then
+                local _ubuntu_ostype="$(lsb_release -ds)"
+                case "$_ubuntu_ostype" in
+                    Ubuntu\ 20*)
+                        local _ostype="ubuntu20.04"
+                        ;;
+                    *)
+                        local _ostype="ubuntu22.04"
+                        ;;
+                esac
+            fi
             ;;
         Darwin)
             local _ostype=darwin
