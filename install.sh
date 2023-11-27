@@ -116,15 +116,16 @@ get_architecture() {
 
     case "$_ostype" in
         Linux | linux)
-            local _ostype=linux
+            local _ostype="ubuntu22.04"
             if check_cmd lsb_release; then
                 local _ubuntu_ostype="$(lsb_release -ds)"
                 case "$_ubuntu_ostype" in
-                    Ubuntu\ 20*)
-                        local _ostype="ubuntu20.04"
+                    Ubuntu\ 22*)
+                        check_apt_install libc++abi1-15
                         ;;
-                    *)
-                        local _ostype="ubuntu22.04"
+                    Ubuntu\ 20*)
+                        check_apt_install libc++abi1-10
+                        local _ostype="ubuntu20.04"
                         ;;
                 esac
             fi
@@ -217,6 +218,12 @@ downloader() {
     elif [ "$_dld" = wget ]
     then wget "$1" -O "$2"
     else err "Unknown downloader"   # should not reach here
+    fi
+}
+
+check_apt_install() {
+    if [ "$(dpkg-query -l | grep $1 | wc -l)" = 0 ]; then
+        sudo apt install -y $1
     fi
 }
 
