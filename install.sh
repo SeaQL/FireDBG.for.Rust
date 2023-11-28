@@ -126,7 +126,7 @@ get_architecture() {
                     Ubuntu\ 20*)
                         check_apt_install libc++abi1-10
                         local _ostype="ubuntu20.04"
-                    Debian\ GNU/Linux\ 10*)
+                    Debian\ GNU\/Linux\ 10*)
                         check_apt_install libc++abi1-13
                         local _ostype="debian10"
                         ;;
