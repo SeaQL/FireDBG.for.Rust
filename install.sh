@@ -128,7 +128,7 @@ get_architecture() {
                         local _ostype="ubuntu20.04"
                         ;;
                     Debian\ GNU\/Linux\ 10*)
-                        check_apt_install libc++abi1-13
+                        check_apt_install libc++abi1-7
                         local _ostype="debian10"
                         ;;
                 esac
