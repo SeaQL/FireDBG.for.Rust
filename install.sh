@@ -131,7 +131,7 @@ get_architecture() {
                     ;;
                 fedora39*)
                     ;;
-                centos*)
+                centos9*)
                     ;;
             esac
             ;;
