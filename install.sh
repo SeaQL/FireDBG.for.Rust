@@ -116,23 +116,24 @@ get_architecture() {
 
     case "$_ostype" in
         Linux | linux)
-            local _ostype="ubuntu22.04"
-            if check_cmd lsb_release; then
-                local _ubuntu_ostype="$(lsb_release -ds)"
-                case "$_ubuntu_ostype" in
-                    Ubuntu\ 22*)
-                        check_apt_install libc++abi1-15
-                        ;;
-                    Ubuntu\ 20*)
-                        check_apt_install libc++abi1-10
-                        local _ostype="ubuntu20.04"
-                        ;;
-                    Debian\ GNU\/Linux\ 10*)
-                        check_apt_install libc++abi1-7
-                        local _ostype="debian10"
-                        ;;
-                esac
-            fi
+            local _os_id="$(awk -F= '$1=="ID" { print $2 ;}' /etc/os-release | tr -d '"')"
+            local _os_version_id="$(awk -F= '$1=="VERSION_ID" { print $2 ;}' /etc/os-release | tr -d '"')"
+            local _ostype="$_os_id$_os_version_id"
+            case "$_ostype" in
+                ubuntu22*)
+                    check_apt_install libc++abi1-15
+                    ;;
+                ubuntu20*)
+                    check_apt_install libc++abi1-10
+                    ;;
+                debian10*)
+                    check_apt_install libc++abi1-7
+                    ;;
+                fedora39*)
+                    ;;
+                centos*)
+                    ;;
+            esac
             ;;
         Darwin)
             local _ostype=darwin
