@@ -126,6 +126,9 @@ get_architecture() {
                 ubuntu20*)
                     check_apt_install libc++abi1-10
                     ;;
+                debian12*)
+                    check_apt_install libc++abi1-14
+                    ;;
                 debian10*)
                     check_apt_install libc++abi1-7
                     ;;
