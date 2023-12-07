@@ -8,7 +8,7 @@ get_firedbg_version() {
 
     case "$_rustc_version" in
         rustc\ 1.74.*)
-            local _firedbg_version="1.74.0-rc.1"
+            local _firedbg_version="1.74.0"
             ;;
         *)
             err "no precompiled binaries available for $_rustc_version";
@@ -133,13 +133,16 @@ get_architecture() {
                     ;;
                 centos9*)
                     ;;
+                *)
+                    err "no precompiled binaries available for OS: $_ostype"
+                    ;;
             esac
             ;;
         Darwin)
             local _ostype=darwin
             ;;
         MINGW* | MSYS* | CYGWIN*)
-            err "please run this installation script inside Windows Subsystem for Linux (WSL)"
+            err "please run this installation script inside Windows Subsystem for Linux (WSL 2)"
             ;;
         *)
             err "no precompiled binaries available for OS: $_ostype"
