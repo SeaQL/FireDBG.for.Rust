@@ -1,0 +1,17 @@
+[package]
+name = "firedbg-protocol"
+version = "1.0.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = ["Chris Tsang <chris.2y3@outlook.com>"]
+description = "FireDBG Event Stream Protocol"
+homepage = "https://firedbg.sea-ql.org"
+documentation = "https://docs.rs/firedbg-protocol"
+repository = "https://github.com/SeaQL/FireDBG.for.Rust"
+categories = ["development-tools::debugging"]
+keywords = ["streaming"]
+
+[dependencies]
+indexmap = { version = "2", features = ["serde"] }
+serde = { version = "1", features = ["derive"] }
+strum = { version = "0.25", features = ["derive"] }
