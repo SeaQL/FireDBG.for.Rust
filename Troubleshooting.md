@@ -51,8 +51,7 @@
 	sudo dnf install libcxxabi
 
 	# CentOS Stream 9
-	curl -sSfL https://github.com/SeaQL/FireDBG.for.Rust/releases/download/1.74.0/libcxx-centos9.tar.gz -o libcxx-centos9.tar.gz
-	tar -xvf libcxx-centos9.tar.gz -C /
+	sudo yum install https://kojipkgs.fedoraproject.org//packages/libcxx/17.0.4/1.fc39/x86_64/libcxxabi-17.0.4-1.fc39.x86_64.rpm
 	```
 
 - shared library `libunwind.so` not found
