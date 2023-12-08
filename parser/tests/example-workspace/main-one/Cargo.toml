@@ -1,0 +1,13 @@
+[package]
+name = "main-one"
+version = "0.1.0"
+authors = ["Your Name Here"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+quick-sort = { path = "../quick-sort" }
+serde = { git = "https://github.com/serde-rs/serde" }
+syn = { version = "2" }
+rand = "0.8.5"

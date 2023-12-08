@@ -1,0 +1,13 @@
+[package]
+name = "main-two"
+version = "0.1.0"
+authors = ["Your Name Here"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "renamed_main"
+path = "src/renamed-main.rs"
+
+[dependencies]

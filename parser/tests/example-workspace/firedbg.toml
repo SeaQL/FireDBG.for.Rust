@@ -1,0 +1,5 @@
+[workspace.members]
+# sea-query = { trace = "full" }
+main-one = { trace = "call-only" } 
+main-two = { trace = "full" } 
+quick-sort = { trace = "full" }

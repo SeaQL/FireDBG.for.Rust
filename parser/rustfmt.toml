@@ -1,0 +1,4 @@
+format_code_in_doc_comments=true
+ignore = [
+    "tests/common",
+]

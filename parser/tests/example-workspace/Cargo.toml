@@ -1,0 +1,7 @@
+[workspace]
+resolver = "2"
+members = [
+    "main-one",
+    "main-two",
+    "quick-sort",
+]

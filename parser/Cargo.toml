@@ -1,0 +1,28 @@
+[package]
+name = "firedbg-rust-parser"
+version = "1.0.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = ["Billy Chan <ccw.billy.123@gmail.com>"]
+description = "FireDBG Source Parser for Rust"
+homepage = "https://firedbg.sea-ql.org"
+documentation = "https://docs.rs/firedbg-rust-parser"
+repository = "https://github.com/SeaQL/FireDBG.for.Rust"
+categories = ["development-tools::debugging"]
+keywords = ["parser"]
+
+[dependencies]
+firedbg-protocol = { path = "../protocol", version = "1.0.0" }
+syn = { version = "2", features = ["full", "extra-traits"] }
+proc-macro2 = { version = "1", features = ["span-locations"] }
+async-trait = { version = "0.1" }
+glob = { version = "0.3" }
+serde_json = { version = "1" }
+serde = { version = "1" }
+bson = { version = "2" }
+sea-streamer-file = { version = "0.3", features = ["runtime-tokio"] }
+tokio = { version = "1", features = ["full"] }
+anyhow = { version = "1" }
+
+[dev-dependencies]
+pretty_assertions = { version = "1" }
