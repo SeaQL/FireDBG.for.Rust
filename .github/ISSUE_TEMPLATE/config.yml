@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a Bug
+    url: https://github.com/SeaQL/FireDBG.for.Rust/discussions/new?category=bug
+    about: Report a suspected bug
+  - name: Feature Request
+    url: https://github.com/SeaQL/FireDBG.for.Rust/discussions/new?category=ideas
+    about: Suggest a new feature for this project
+  - name: Q & A
+    url: https://github.com/SeaQL/FireDBG.for.Rust/discussions/new?category=q-a
+    about: Ask a question or look for help
