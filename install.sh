@@ -136,6 +136,9 @@ get_architecture() {
                     check_dnf_install libcxxabi
                     ;;
                 centos9*)
+                    if [ "$(dnf list installed | grep libcxxabi | wc -l)" = 0 ]; then
+                        sudo yum install https://kojipkgs.fedoraproject.org//packages/libcxx/17.0.4/1.fc39/x86_64/libcxxabi-17.0.4-1.fc39.x86_64.rpm
+                    fi
                     ;;
                 *)
                     err "no precompiled binaries available for OS: $_ostype"
