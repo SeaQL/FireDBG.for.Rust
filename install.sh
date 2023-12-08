@@ -133,6 +133,7 @@ get_architecture() {
                     check_apt_install libc++abi1-7
                     ;;
                 fedora39*)
+                    check_dnf_install libcxxabi
                     ;;
                 centos9*)
                     ;;
@@ -235,6 +236,12 @@ downloader() {
 check_apt_install() {
     if [ "$(dpkg-query -l | grep $1 | wc -l)" = 0 ]; then
         sudo apt install -y $1
+    fi
+}
+
+check_dnf_install() {
+    if [ "$(dnf list installed | grep $1 | wc -l)" = 0 ]; then
+        sudo dnf install -y $1
     fi
 }
 
