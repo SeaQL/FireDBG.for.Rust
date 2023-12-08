@@ -1,0 +1,19 @@
+[package]
+name = "firedbg-rust-debugger"
+version = "1.74.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+# build = "build.rs"
+authors = ["Chris Tsang <chris.2y3@outlook.com>"]
+description = "FireDBG Debugger Engine for Rust"
+homepage = "https://firedbg.sea-ql.org"
+documentation = "https://docs.rs/firedbg-rust-debugger"
+repository = "https://github.com/SeaQL/FireDBG.for.Rust"
+categories = ["development-tools::debugging"]
+keywords = ["debugger", "debugging", "tracing"]
+
+[dependencies]
+firedbg-protocol = { path = "../protocol", version = "1.0.0" }
+sea-streamer = { version = "0.3" }
+firedbg-rust-parser = { path = "../parser", version = "1.0.0", optional = true }
+frozen-hashbrown = { version = "0.1.0", optional = true }
