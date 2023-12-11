@@ -1,0 +1,10 @@
+[workspace]
+members = [
+    "protocol",
+    "debugger",
+    "indexer",
+    "parser",
+    "command",
+    "library",
+]
+resolver = "2"
