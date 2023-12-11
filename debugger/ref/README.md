@@ -1,0 +1,1 @@
+Some reference JSONs to remind me about the data structures.
