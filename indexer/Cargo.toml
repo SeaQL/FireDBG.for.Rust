@@ -1,0 +1,53 @@
+[package]
+name = "firedbg-stream-indexer"
+version = "1.74.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = [
+    "Chris Tsang <chris.2y3@outlook.com>",
+    "Billy Chan <ccw.billy.123@gmail.com>",
+]
+description = "FireDBG Event Indexer"
+homepage = "https://firedbg.sea-ql.org"
+documentation = "https://docs.rs/firedbg-stream-indexer"
+repository = "https://github.com/SeaQL/FireDBG.for.Rust"
+categories = ["development-tools::debugging"]
+keywords = ["sqlite"]
+
+[dependencies]
+anyhow = { version = "1", optional = true }
+env_logger = { version = "0.9", optional = true }
+flume = { version = "0.10", default-features = false, features = ["async"], optional = true }
+log = { version = "0.4", default-features = false }
+sea-orm = { version = "0.12" }
+sea-streamer = { version = "0.3", optional = true, features = ["file", "socket", "json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", optional = true }
+structopt = { version = "0.3", optional = true }
+tokio = { version = "1", optional = true }
+pretty_assertions = { version = "1", optional = true }
+async-trait = { version = "0.1", optional = true }
+# workspace
+firedbg-rust-debugger = { path = "../debugger", version = "1.74.1", default-features = false }
+
+[features]
+# The base feature only exports the sea-orm entities
+default = ["executable"]
+executable = [
+    "anyhow",
+    "env_logger",
+    "flume",
+    "tokio/full",
+    "serde_json",
+    "structopt",
+    "sea-streamer/runtime-tokio",
+    "sea-orm/sqlx-sqlite",
+    "sea-orm/runtime-tokio-native-tls",
+    "pretty_assertions",
+    "async-trait",
+]
+
+[[bin]]
+name = "firedbg-indexer"
+path = "src/main.rs"
+required-features = ["executable"]
