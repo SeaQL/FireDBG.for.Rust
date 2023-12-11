@@ -1,0 +1,1 @@
+This `lldb` binding crate is forked from https://github.com/vadimcn/codelldb
