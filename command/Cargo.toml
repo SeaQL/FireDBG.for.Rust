@@ -1,0 +1,37 @@
+[package]
+name = "firedbg-cli"
+version = "1.74.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = [
+    "Chris Tsang <chris.2y3@outlook.com>",
+    "Billy Chan <ccw.billy.123@gmail.com>",
+]
+description = "FireDBG command line interface"
+homepage = "https://firedbg.sea-ql.org"
+documentation = "https://docs.rs/firedbg-cli"
+repository = "https://github.com/SeaQL/FireDBG.for.Rust"
+categories = ["development-tools::debugging"]
+keywords = ["debugger", "debugging", "tracing"]
+
+[dependencies]
+anyhow = { version = "1" }
+env_logger = { version = "0.9" }
+log = { version = "0.4", default-features = false }
+structopt = { version = "0.3" }
+glob = { version = "0.3" }
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1" }
+serde_json = { version = "1" }
+toml = { version = "0.8" }
+rayon = { version = "1.8" }
+anstyle = { version = "1" }
+# workspace
+firedbg-rust-parser = { path = "../parser", version = "1.0.0" }
+
+[dev-dependencies]
+pretty_assertions = { version = "1" }
+
+[[bin]]
+name = "firedbg"
+path = "src/main.rs"
