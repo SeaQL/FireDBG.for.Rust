@@ -123,6 +123,9 @@ get_architecture() {
                 ubuntu22*)
                     check_apt_install libc++abi1-15
                     ;;
+                pop22*)
+                    check_apt_install libc++abi1-15
+                    ;;
                 ubuntu20*)
                     check_apt_install libc++abi1-10
                     ;;
