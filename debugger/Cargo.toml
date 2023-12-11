@@ -3,6 +3,7 @@ name = "firedbg-rust-debugger"
 version = "1.74.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
+build = "build.rs"
 authors = ["Chris Tsang <chris.2y3@outlook.com>"]
 description = "FireDBG Debugger Engine for Rust"
 homepage = "https://firedbg.sea-ql.org"
@@ -14,5 +15,49 @@ keywords = ["debugger", "debugging", "tracing"]
 [dependencies]
 firedbg-protocol = { path = "../protocol", version = "1.0.0" }
 sea-streamer = { version = "0.3" }
-firedbg-rust-parser = { path = "../parser", version = "1.0.0" }
-frozen-hashbrown = { version = "0.1.0" }
+lldb = { path = "../codelldb/adapter/crates/lldb", optional = true }
+firedbg-rust-parser = { path = "../parser", version = "1.0.0", optional = true }
+frozen-hashbrown = { version = "0.1.0", optional = true }
+# external dependencies
+anyhow = { version = "1", optional = true }
+dotenvy = { version = "0.15", optional = true }
+env_logger = { version = "0.10", optional = true }
+glob = { version = "0.3", optional = true }
+lazy_static = { version = "1.4", optional = true }
+log = { version = "0.4", default-features = false, optional = true }
+rustc-hash = { version = "1", optional = true }
+serde_json = { version = "1", optional = true }
+structopt = { version = "0.3", optional = true }
+thiserror = { version = "1", optional = true }
+tokio = { version = "1", features = ["full"], optional = true }
+
+[dev-dependencies]
+pretty_assertions = { version = "1" }
+
+[features]
+# The base feature only exports the value reader
+default = ["debugger"]
+debugger = [
+    "lldb",
+    "firedbg-rust-parser",
+    "frozen-hashbrown",
+    "sea-streamer/file",
+    "sea-streamer/socket",
+    "sea-streamer/runtime-tokio",
+    "anyhow",
+    "dotenvy",
+    "env_logger",
+    "glob",
+    "lazy_static",
+    "log",
+    "rustc-hash",
+    "serde_json",
+    "structopt",
+    "thiserror",
+    "tokio",
+]
+
+[[bin]]
+name = "firedbg-debugger"
+path = "src/main.rs"
+required-features = ["debugger"]
