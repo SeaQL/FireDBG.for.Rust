@@ -89,7 +89,7 @@ struct PackageCfg {
 }
 
 fn parse_package_cfg(src: &str) -> Result<PackageCfg> {
-    let (package, trace) = src.split_once('/').expect("delimiter");
+    let (package, trace) = src.rsplit_once('/').expect("delimiter");
     Ok(PackageCfg {
         package: package.into(),
         trace: trace.into(),
