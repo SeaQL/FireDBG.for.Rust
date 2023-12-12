@@ -120,10 +120,12 @@ get_architecture() {
             local _os_version_id="$(awk -F= '$1=="VERSION_ID" { print $2 ;}' /etc/os-release | tr -d '"')"
             local _ostype="$_os_id$_os_version_id"
             case "$_ostype" in
-                ubuntu22*)
-                    check_apt_install libc++abi1-15
+                pop*)
+                    local _ostype="ubuntu$_os_version_id"
                     ;;
-                pop22*)
+            esac
+            case "$_ostype" in
+                ubuntu22*)
                     check_apt_install libc++abi1-15
                     ;;
                 ubuntu20*)
