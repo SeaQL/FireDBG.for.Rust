@@ -48,6 +48,7 @@ main() {
         _cargo_home="$HOME/.cargo";
     fi
     local _cargo_bin="$_cargo_home/bin"
+    ensure mkdir -p "$_cargo_bin"
     set -u
 
     printf '%s `%s`\n' 'info: downloading FireDBG from' "$_url" 1>&2
