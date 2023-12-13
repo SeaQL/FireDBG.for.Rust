@@ -14,6 +14,7 @@ pub const STD_HASH_STATE: &str = ", std::collections::hash::map::RandomState>";
 pub const CORE_REF_CELL: &str = "core::cell::RefCell<";
 pub const STD_MUTEX: &str = "std::sync::mutex::Mutex<";
 pub const STD_RWLOCK: &str = "std::sync::rwlock::RwLock<";
+pub const STD_OS_STRING: &str = "std::ffi::os_str::OsString";
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type")]
@@ -297,15 +298,7 @@ impl Display for RValue {
                 if typename.starts_with('&') {
                     write!(f, "&")?;
                 }
-                write!(f, "[")?;
-                for (i, b) in value.iter().enumerate() {
-                    write!(
-                        f,
-                        "0x{b:02x}{}",
-                        if i < value.len() - 1 { ", " } else { "" }
-                    )?;
-                }
-                write!(f, "]")?;
+                print_bytes(f, &value)?;
             }
             Self::Ref {
                 typename, value, ..
@@ -409,7 +402,9 @@ impl Display for RValue {
                     }
                     return write!(f, ")");
                 }
-                if (typename.starts_with(STD_HASH_MAP) || typename.starts_with(STD_HASH_SET))
+                if typename == STD_OS_STRING {
+                    print_os_string(f, fields, width, pretty)?;
+                } else if (typename.starts_with(STD_HASH_MAP) || typename.starts_with(STD_HASH_SET))
                     && typename.ends_with(STD_HASH_STATE)
                     && (fields.contains_key("items") && fields.contains_key("len"))
                 {
@@ -652,6 +647,53 @@ fn print_hashmap(
     Ok(())
 }
 
+fn print_os_string(
+    f: &mut std::fmt::Formatter<'_>,
+    fields: &IndexMap<String, RValue>,
+    width: usize,
+    pretty: bool,
+) -> std::fmt::Result {
+    write!(f, "{}::from_encoded_bytes_unchecked(", STD_OS_STRING)?;
+    if pretty {
+        write!(
+            f,
+            "{}",
+            String::from_utf8(vec![b' '; (width + 1) * 4]).unwrap()
+        )?;
+    }
+    let inner = match fields.get("inner") {
+        Some(RValue::Struct { fields, .. }) => {
+            if let Some(inner) = fields.get("inner") {
+                match inner {
+                    RValue::Bytes { value, .. } => value,
+                    _ => {
+                        write!(f, "?)")?;
+                        return Ok(());
+                    }
+                }
+            } else {
+                write!(f, "?)")?;
+                return Ok(());
+            }
+        }
+        _ => {
+            write!(f, "?)")?;
+            return Ok(());
+        }
+    };
+    if let Ok(string) = std::str::from_utf8(inner) {
+        write!(f, "String::from({:?}).into_bytes()", string)?;
+    } else {
+        write!(f, "vec!")?;
+        print_bytes(f, inner)?;
+    }
+    if pretty {
+        write!(f, "{}", String::from_utf8(vec![b' '; width * 4]).unwrap())?;
+    }
+    write!(f, ")")?;
+    Ok(())
+}
+
 fn print_arr_items(
     f: &mut std::fmt::Formatter<'_>,
     data: &[RValue],
@@ -678,6 +720,19 @@ fn print_arr_items(
     }
     if pretty {
         write!(f, "{}", String::from_utf8(vec![b' '; width * 4]).unwrap())?;
+    }
+    write!(f, "]")?;
+    Ok(())
+}
+
+fn print_bytes(f: &mut std::fmt::Formatter<'_>, bytes: &[u8]) -> std::fmt::Result {
+    write!(f, "[")?;
+    for (i, b) in bytes.iter().enumerate() {
+        write!(
+            f,
+            "0x{b:02x}{}",
+            if i < bytes.len() - 1 { ", " } else { "" }
+        )?;
     }
     write!(f, "]")?;
     Ok(())
