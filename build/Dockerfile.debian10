@@ -1,0 +1,41 @@
+# 1. Build the Docker image
+#    ```
+#    docker build --no-cache -t firedbg-debian10 -f build/Dockerfile.debian10 .
+#    # Or, keeping the full build log
+#    docker build --no-cache --progress plain -t firedbg-debian10 -f build/Dockerfile.debian10 .
+#    ```
+# 2. Start a Docker container and mount the directories to the container
+#    ```
+#    docker run --name firedbg-debian10 --rm -it -v $(pwd):/FireDBG.for.Rust firedbg-debian10
+#    ```
+# 3. Buuld release
+#    ```
+#    cd /FireDBG.for.Rust && sh build-tools/release-x86_64-debian.sh
+#    ```
+
+FROM debian:10
+
+# apt install without interactive dialogue
+ARG DEBIAN_FRONTEND=noninteractive
+
+# The following dependencies are required
+RUN apt update
+# Needed in `release.sh`
+RUN apt install curl unzip -y
+# Needed to build FireDBG executables and run self tests
+RUN apt install clang build-essential pkg-config libssl-dev -y
+RUN apt install liblldb-13 python3-lldb-13 libc++-13-dev libc++abi1-13 -y
+RUN apt install libc++-dev -y
+# Link c++ to `clang` instead of g++
+RUN update-alternatives --set c++ /usr/bin/clang++
+
+# Install Rust
+RUN curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y
+ENV PATH "/root/.cargo/bin:$PATH"
+
+# Create symbolic links such that `cargo` and `lldb` can locate them
+RUN ln -s /usr/lib/x86_64-linux-gnu/liblldb-13.so.1 /usr/lib/x86_64-linux-gnu/liblldb.so
+RUN ln -s /usr/lib/x86_64-linux-gnu/libc++abi.so.1 /usr/lib/x86_64-linux-gnu/libc++abi.so
+
+# For unknown reason, if LLDB cannot locate `lldb-server`
+RUN export LLDB_DEBUGSERVER_PATH=/usr/lib/llvm-13/bin/lldb-server-13.0.0

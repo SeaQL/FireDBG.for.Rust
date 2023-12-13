@@ -1,0 +1,33 @@
+# 1. Build the Docker image
+#    ```
+#    docker build --no-cache -t firedbg-centos9 -f build/Dockerfile.centos9 .
+#    # Or, keeping the full build log
+#    docker build --no-cache --progress plain -t firedbg-centos9 -f build/Dockerfile.centos9 .
+#    ```
+# 2. Start a Docker container and mount the directories to the container
+#    ```
+#    docker run --name firedbg-centos9 --rm -it -v $(pwd):/FireDBG.for.Rust firedbg-centos9
+#    ```
+# 3. Buuld release
+#    ```
+#    cd /FireDBG.for.Rust && sh build-tools/release-x86_64-centos.sh
+#    ```
+
+FROM quay.io/centos/centos:stream9
+
+# The following dependencies are required
+RUN yum update -y
+# Needed in `release.sh`
+RUN yum install -y --allowerasing --skip-broken --nobest curl unzip
+# Needed to build FireDBG executables and run self tests
+RUN yum groupinstall -y "Development Tools"
+RUN yum install -y --allowerasing --skip-broken --nobest clang pkg-config openssl-devel
+RUN yum install -y --allowerasing --skip-broken --nobest lldb-devel python3-lldb
+
+# Linking `libcxx-devel` & `libcxxabi`
+COPY build-tools/libcxx-centos9.tar.gz /
+RUN tar -xvf /libcxx-centos9.tar.gz -C /
+
+# Install Rust
+RUN curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y
+ENV PATH "/root/.cargo/bin:$PATH"

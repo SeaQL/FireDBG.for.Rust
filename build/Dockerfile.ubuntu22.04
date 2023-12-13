@@ -1,0 +1,40 @@
+# 1. Build the Docker image
+#    ```
+#    docker build --no-cache -t firedbg-ubuntu22.04 -f build/Dockerfile.ubuntu22.04 .
+#    # Or, keeping the full build log
+#    docker build --no-cache --progress plain -t firedbg-ubuntu22.04 -f build/Dockerfile.ubuntu22.04 .
+#    ```
+# 2. Start a Docker container and mount the directories to the container
+#    ```
+#    docker run --name firedbg-ubuntu22.04 --rm -it -v $(pwd):/FireDBG.for.Rust firedbg-ubuntu22.04
+#    ```
+# 3. Buuld release
+#    ```
+#    cd /FireDBG.for.Rust && sh build-tools/release-x86_64-ubuntu.sh
+#    ```
+
+FROM ubuntu:22.04
+
+# apt install without interactive dialogue
+ARG DEBIAN_FRONTEND=noninteractive
+
+# The following dependencies are required
+RUN apt update
+# Needed in `release.sh`
+RUN apt install curl unzip -y
+# Needed to build FireDBG executables and run self tests
+RUN apt install clang build-essential pkg-config libssl-dev -y
+RUN apt install liblldb-14 python3-lldb-14 libc++-dev libc++abi1-14 -y
+# Link c++ to `clang` instead of g++
+RUN update-alternatives --set c++ /usr/bin/clang++
+
+# Install Rust
+RUN curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y
+ENV PATH "/root/.cargo/bin:$PATH"
+
+# Create symbolic links such that `cargo` and `lldb` can locate them
+RUN ln -s /usr/lib/x86_64-linux-gnu/liblldb-14.so.1 /usr/lib/x86_64-linux-gnu/liblldb.so
+RUN ln -s /usr/lib/x86_64-linux-gnu/libc++abi.so.1 /usr/lib/x86_64-linux-gnu/libc++abi.so
+
+# For unknown reason, if LLDB cannot locate `lldb-server`
+RUN export LLDB_DEBUGSERVER_PATH=/usr/lib/llvm-14/bin/lldb-server-14.0.0
