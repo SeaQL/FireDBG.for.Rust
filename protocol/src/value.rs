@@ -657,7 +657,7 @@ fn print_os_string(
     if pretty {
         write!(
             f,
-            "{}",
+            "\n{}",
             String::from_utf8(vec![b' '; (width + 1) * 4]).unwrap()
         )?;
     }
@@ -688,7 +688,7 @@ fn print_os_string(
         print_bytes(f, inner)?;
     }
     if pretty {
-        write!(f, "{}", String::from_utf8(vec![b' '; width * 4]).unwrap())?;
+        write!(f, "\n{}", String::from_utf8(vec![b' '; width * 4]).unwrap())?;
     }
     write!(f, ")")?;
     Ok(())
