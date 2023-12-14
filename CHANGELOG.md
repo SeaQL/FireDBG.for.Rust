@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.74.2 - 2023-12-14
+
+### Enhancements
+
+- Prettify `OsString`
+- Better rendering of `Vec<String>` and `Vec<Vec<String>>`
+
 ## 1.74.1 - 2023-12-12
 
 ### Bug Fixes
