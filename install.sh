@@ -8,7 +8,7 @@ get_firedbg_version() {
 
     case "$_rustc_version" in
         rustc\ 1.74.*)
-            local _firedbg_version="1.74.1"
+            local _firedbg_version="1.74.2"
             ;;
         *)
             err "no precompiled binaries available for $_rustc_version";
