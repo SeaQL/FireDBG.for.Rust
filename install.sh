@@ -144,7 +144,7 @@ get_architecture() {
                 centos9*)
                     check_yum_install_rpm libcxxabi https://kojipkgs.fedoraproject.org//packages/libcxx/17.0.4/1.fc39/x86_64/libcxxabi-17.0.4-1.fc39.x86_64.rpm
                     ;;
-                arch* | manjaro*)
+                arch* | manjaro* | endeavouros*)
                     check_pacman_install libc++abi
                     local _ostype="ubuntu20.04"
                     ;;
