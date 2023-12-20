@@ -1,6 +1,6 @@
 [package]
 name = "firedbg-rust-debugger"
-version = "1.74.2"
+version = "1.75.0-beta.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 build = "build.rs"
