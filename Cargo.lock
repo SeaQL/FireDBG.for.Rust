@@ -757,7 +757,7 @@ dependencies = [
  "env_logger 0.10.1",
  "firedbg-protocol",
  "firedbg-rust-parser",
- "frozen-hashbrown 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "frozen-hashbrown",
  "glob",
  "lazy_static",
  "lldb",
@@ -853,14 +853,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e13624c2627564efccf4934284bdd98cbaa14e79b0b5a141218e507b3a823456"
 dependencies = [
  "percent-encoding",
-]
-
-[[package]]
-name = "frozen-hashbrown"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "cfg-if",
 ]
 
 [[package]]
