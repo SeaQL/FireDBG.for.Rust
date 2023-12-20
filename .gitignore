@@ -1,5 +1,3 @@
 target/
 firedbg/
-Cargo.lock
-!/Cargo.lock
 .DS_Store
