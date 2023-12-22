@@ -272,6 +272,10 @@ Note that the function passes through the ownership of the variable, just like t
 ```rust
 fn __firedbg_trace__<T>(name: &'static str, v: T) -> T { v }
 ```
+## Roadmap
+
++ Heap allocation tracing
++ Async Rust support
 
 ## License
 
