@@ -73,6 +73,8 @@ enum SubCommand {
         binary_name: Option<String>,
         args: Vec<String>,
         #[structopt(long)]
+        config: Option<String>,
+        #[structopt(long)]
         output: Option<String>,
     },
     /// Run an integrated test with debugging enabled
@@ -96,6 +98,8 @@ enum SubCommand {
         example_name: String,
         args: Vec<String>,
         #[structopt(long)]
+        config: Option<String>,
+        #[structopt(long)]
         output: Option<String>,
     },
     /// List all `firedbg` runs
@@ -117,6 +121,11 @@ enum SubCommand {
     Index {
         #[structopt(default_value = "1")]
         idx: usize,
+    },
+    #[structopt(setting = structopt::clap::AppSettings::Hidden)]
+    ListConfig {
+        #[structopt(long)]
+        json_format: bool,
     },
 }
 
@@ -152,7 +161,8 @@ async fn main() -> Result<()> {
         }
         SubCommand::Run {
             binary_name,
-            args,
+            mut args,
+            config,
             output,
         } => {
             let binary_names = workspace.binary_names();
@@ -179,8 +189,14 @@ async fn main() -> Result<()> {
             } else {
                 list()
             };
-            let trace_cfg =
-                &parse_trace_config(workspace, package).context("Fail to parse trace config")?;
+            let firedbg_config =
+                &parse_firedbg_config(workspace).context("Fail to parse `firedbg.toml`")?;
+            let exp_target_type = cfg::TargetType::Binary {
+                name: binary.name.to_owned(),
+            };
+            load_default_argv(&mut args, firedbg_config, &config, &exp_target_type)?;
+            let trace_cfg = &parse_trace_config(firedbg_config, workspace, package)
+                .context("Fail to parse trace config")?;
             cache_workspace(workspace)
                 .await
                 .context("Fail to cache workspace")?;
@@ -218,8 +234,10 @@ async fn main() -> Result<()> {
                 println!("\t{}", testcases.join("\n\t"));
                 exit(1);
             }
-            let trace_cfg =
-                &parse_trace_config(workspace, package).context("Fail to parse trace config")?;
+            let config =
+                &parse_firedbg_config(workspace).context("Fail to parse `firedbg.toml`")?;
+            let trace_cfg = &parse_trace_config(config, workspace, package)
+                .context("Fail to parse trace config")?;
             cache_workspace(workspace)
                 .await
                 .context("Fail to cache workspace")?;
@@ -262,8 +280,10 @@ async fn main() -> Result<()> {
                 println!("\t{}", testcases.join("\n\t"));
                 exit(1);
             }
-            let trace_cfg =
-                &parse_trace_config(workspace, package).context("Fail to parse trace config")?;
+            let config =
+                &parse_firedbg_config(workspace).context("Fail to parse `firedbg.toml`")?;
+            let trace_cfg = &parse_trace_config(config, workspace, package)
+                .context("Fail to parse trace config")?;
             cache_workspace(workspace)
                 .await
                 .context("Fail to cache workspace")?;
@@ -281,7 +301,8 @@ async fn main() -> Result<()> {
         }
         SubCommand::Example {
             example_name,
-            args,
+            mut args,
+            config,
             output,
         } => {
             // Show all available examples if the input example is unknown
@@ -291,8 +312,14 @@ async fn main() -> Result<()> {
                 println!("\t{}", workspace.example_names().join("\n\t"));
                 exit(1);
             };
-            let trace_cfg =
-                &parse_trace_config(workspace, package).context("Fail to parse trace config")?;
+            let firedbg_config =
+                &parse_firedbg_config(workspace).context("Fail to parse `firedbg.toml`")?;
+            let exp_target_type = cfg::TargetType::Example {
+                name: example_name.to_owned(),
+            };
+            load_default_argv(&mut args, firedbg_config, &config, &exp_target_type)?;
+            let trace_cfg = &parse_trace_config(firedbg_config, workspace, package)
+                .context("Fail to parse trace config")?;
             cache_workspace(workspace)
                 .await
                 .context("Fail to cache workspace")?;
@@ -368,6 +395,15 @@ async fn main() -> Result<()> {
 
             command.spawn()?.wait()?;
         }
+        SubCommand::ListConfig { json_format } => {
+            let config =
+                &parse_firedbg_config(workspace).context("Fail to parse `firedbg.toml`")?;
+            if !json_format {
+                println!("{:#?}", config);
+            } else {
+                println!("{}", serde_json::json!(config));
+            }
+        }
     }
 
     Ok(())
@@ -387,17 +423,15 @@ fn parse_firedbg_config(workspace: &Workspace) -> Result<cfg::Config> {
         );
         cfg::Config::default()
     };
+    log::info!("firedbg_config\n{:#?}", config);
     Ok(config)
 }
 
 fn parse_trace_config<'a>(
+    config: &'a cfg::Config,
     workspace: &'a Workspace,
     executable_package: &'a Package,
 ) -> Result<Vec<(&'a Package, cfg::Trace)>> {
-    let config = &parse_firedbg_config(workspace).context("Fail to parse `firedbg.toml`")?;
-
-    log::info!("firedbg_config\n{:#?}", config);
-
     // All package is set to trace none by default; except the executable package set to trace full
     let mut trace_packages = workspace
         .packages
@@ -1000,4 +1034,30 @@ fn cargo_bin() -> Result<String> {
         anyhow::bail!("Fail to parse cargo home")
     };
     Ok(res)
+}
+
+fn load_default_argv(
+    args: &mut Vec<String>,
+    firedbg_config: &cfg::Config,
+    config: &Option<String>,
+    target_type: &cfg::TargetType,
+) -> Result<()> {
+    if !args.is_empty() {
+        return Ok(());
+    }
+    if config.is_none() {
+        return Ok(());
+    }
+    let config = config.as_ref().unwrap();
+    for cfg::Target { name, target, argv } in firedbg_config.targets.iter() {
+        if name != config {
+            continue;
+        }
+        if target != target_type {
+            continue;
+        }
+        *args = argv.clone();
+        return Ok(());
+    }
+    anyhow::bail!("Run config `{}` cannot be found in `firedbg.toml`", config)
 }

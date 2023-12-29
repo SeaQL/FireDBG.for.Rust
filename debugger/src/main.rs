@@ -131,6 +131,12 @@ async fn main() -> Result<()> {
             crate_name,
             modified,
         } = file;
+        let path = if path.starts_with(workspace_root) {
+            // We want to strip the workspace root and the `/` at the starts
+            path[(workspace_root.len() + 1)..].to_string()
+        } else {
+            path
+        };
         files.push(SourceFile {
             id,
             path,

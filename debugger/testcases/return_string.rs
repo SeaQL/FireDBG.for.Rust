@@ -1,5 +1,5 @@
 fn hello(i: i32) -> String {
-    format!("hello {i}")
+    std::hint::black_box(format!("hello {i}"))
 }
 
 fn world() -> String {
