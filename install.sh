@@ -11,7 +11,7 @@ get_firedbg_version() {
             local _firedbg_version="1.74.2"
             ;;
         rustc\ 1.75.*)
-            local _firedbg_version="1.75.0-beta.1"
+            local _firedbg_version="1.75.0"
             ;;
         *)
             err "no precompiled binaries available for $_rustc_version";
@@ -81,7 +81,9 @@ main() {
 
     local _self_test="$_cargo_home/bin/firedbg-lib/debugger-self-test"
 
-    "$_cargo_home/bin/firedbg" run debugger_self_test --workspace-root "$_self_test" --output "$_self_test/output.firedbg.ss"
+    cd "$_self_test"
+    "$_cargo_home/bin/firedbg" run debugger_self_test --output "$_self_test/output.firedbg.ss"
+    cd - > /dev/null
 
     if [ $? != 0 ]; then
         say "fail to run FireDBG debugger"
