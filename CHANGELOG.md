@@ -4,7 +4,7 @@
 
 ### New Features
 
-- command: new `targets` section in `firedbg.toml` to provide paramsto debugg targets
+- command: new `targets` section in `firedbg.toml` to provide params to debugg targets
 ```toml
 [[targets]]
 # `quicksort/src/bin/quicksort.rs` (Binary)

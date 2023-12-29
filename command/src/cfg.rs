@@ -4,6 +4,7 @@ use std::collections::BTreeMap;
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct Config {
     pub workspace: Workspace,
+    #[serde(default)]
     pub targets: Vec<Target>,
 }
 
