@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.75.1 - Pending
+## 1.75.1 - 2024-01-08
 
 ### Enhancements
 
