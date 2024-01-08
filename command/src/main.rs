@@ -17,7 +17,7 @@ use std::{
     process::exit,
     time::SystemTime,
 };
-use structopt::StructOpt;
+use structopt::{clap::arg_enum, StructOpt};
 use tokio::fs::{create_dir_all, remove_dir_all, remove_file};
 
 const TEMPLATE: &str = concat!(
@@ -111,6 +111,14 @@ enum SubCommand {
     ListTarget {
         #[structopt(long)]
         json_format: bool,
+        #[structopt(
+            long,
+            case_insensitive = true,
+            possible_values = &ListTarget::variants(),
+            default_value = "Bin Example Test UnitTest",
+            value_delimiter = " ",
+        )]
+        targets: Vec<ListTarget>,
     },
     /// Open debugger view in VS Code
     Open {
@@ -127,6 +135,16 @@ enum SubCommand {
         #[structopt(long)]
         json_format: bool,
     },
+}
+
+arg_enum! {
+    #[derive(Debug, PartialEq)]
+    enum ListTarget {
+        Bin,
+        Example,
+        Test,
+        UnitTest,
+    }
 }
 
 #[tokio::main]
@@ -347,7 +365,10 @@ async fn main() -> Result<()> {
                 println!("{}", serde_json::json!(arr));
             }
         }
-        SubCommand::ListTarget { json_format } => list_target(workspace, json_format)
+        SubCommand::ListTarget {
+            json_format,
+            targets,
+        } => list_target(workspace, json_format, targets)
             .await
             .context("Fail to list target")?,
         SubCommand::Open { idx } => {
@@ -858,7 +879,11 @@ fn list_firedbg_runs(firedbg_runs: Vec<PathBuf>) {
     }
 }
 
-async fn list_target(workspace: &Workspace, json_format: bool) -> Result<()> {
+async fn list_target(
+    workspace: &Workspace,
+    json_format: bool,
+    targets: Vec<ListTarget>,
+) -> Result<()> {
     #[derive(Debug, Serialize)]
     struct Target<'a> {
         binaries: Vec<&'a Binary>,
@@ -880,17 +905,37 @@ async fn list_target(workspace: &Workspace, json_format: bool) -> Result<()> {
         test_cases: Vec<String>,
     }
 
-    let binaries: Vec<_> = workspace
-        .packages
-        .iter()
-        .flat_map(|package| &package.binaries)
-        .collect();
+    let list_all = targets.contains(&ListTarget::Bin)
+        && targets.contains(&ListTarget::Example)
+        && targets.contains(&ListTarget::Test)
+        && targets.contains(&ListTarget::UnitTest);
+    let list_partial = !list_all
+        && targets.iter().any(|t| {
+            matches!(
+                t,
+                ListTarget::Bin | ListTarget::Example | ListTarget::Test | ListTarget::UnitTest
+            )
+        });
 
-    let examples: Vec<_> = workspace
-        .packages
-        .iter()
-        .flat_map(|package| &package.examples)
-        .collect();
+    let binaries: Vec<_> = if list_all || (list_partial && targets.contains(&ListTarget::Bin)) {
+        workspace
+            .packages
+            .iter()
+            .flat_map(|package| &package.binaries)
+            .collect()
+    } else {
+        Vec::new()
+    };
+
+    let examples: Vec<_> = if list_all || (list_partial && targets.contains(&ListTarget::Example)) {
+        workspace
+            .packages
+            .iter()
+            .flat_map(|package| &package.examples)
+            .collect()
+    } else {
+        Vec::new()
+    };
 
     fn handle_tests<'a>((package, test): &'a (&'a Package, Option<&'a Test>)) -> TestType {
         if let Some(test) = test {
@@ -926,6 +971,7 @@ async fn list_target(workspace: &Workspace, json_format: bool) -> Result<()> {
             package
                 .tests
                 .iter()
+                .filter(|_| list_all || (list_partial && targets.contains(&ListTarget::Test)))
                 .map(|test| (package, Some(test)))
                 .collect::<Vec<_>>()
         })
@@ -933,6 +979,7 @@ async fn list_target(workspace: &Workspace, json_format: bool) -> Result<()> {
             workspace
                 .packages
                 .iter()
+                .filter(|_| list_all || (list_partial && targets.contains(&ListTarget::UnitTest)))
                 .filter(|package| package.has_lib)
                 .map(|package| (package, None)),
         )
@@ -999,8 +1046,12 @@ async fn list_target(workspace: &Workspace, json_format: bool) -> Result<()> {
     create_dir_all(firedbg_dir)
         .await
         .with_context(|| format!("Fail to create directory: `{firedbg_dir}`"))?;
-    let path = &format!("{firedbg_dir}/target.json");
-    to_json_file(path, &target)
+    let path = if !list_all && list_partial && targets.contains(&ListTarget::UnitTest) {
+        format!("{firedbg_dir}/target-unit-test.json")
+    } else {
+        format!("{firedbg_dir}/target.json")
+    };
+    to_json_file(&path, &target)
         .await
         .with_context(|| format!("Fail to create JSON file: `{path}`"))?;
     Ok(())

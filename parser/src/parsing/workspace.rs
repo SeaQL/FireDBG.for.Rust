@@ -71,6 +71,7 @@ fn parse_binaries(raw_target: Vec<raw::Target>) -> Vec<Binary> {
         .map(|raw_target| Binary {
             name: raw_target.name,
             src_path: raw_target.src_path,
+            required_features: raw_target.required_features,
         })
         .collect()
 }
@@ -82,6 +83,7 @@ fn parse_tests(raw_target: Vec<raw::Target>) -> Vec<Test> {
         .map(|raw_target| Test {
             name: raw_target.name,
             src_path: raw_target.src_path,
+            required_features: raw_target.required_features,
         })
         .collect()
 }
@@ -93,6 +95,7 @@ fn parse_examples(raw_target: Vec<raw::Target>) -> Vec<Example> {
         .map(|raw_target| Example {
             name: raw_target.name,
             src_path: raw_target.src_path,
+            required_features: raw_target.required_features,
         })
         .collect()
 }

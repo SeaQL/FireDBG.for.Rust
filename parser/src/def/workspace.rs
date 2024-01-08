@@ -35,18 +35,21 @@ pub struct Dependency {
 pub struct Binary {
     pub name: String,
     pub src_path: String,
+    pub required_features: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Test {
     pub name: String,
     pub src_path: String,
+    pub required_features: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Example {
     pub name: String,
     pub src_path: String,
+    pub required_features: Vec<String>,
 }
 
 impl Workspace {
@@ -255,6 +258,9 @@ impl Binary {
             .arg(format!("{root_dir}/Cargo.toml"))
             .arg("--bin")
             .arg(binary_name);
+        if !self.required_features.is_empty() {
+            cmd.arg("--features").arg(self.required_features.join(","));
+        }
         cmd
     }
 
@@ -318,6 +324,9 @@ impl Test {
             .arg(format!("{root_dir}/Cargo.toml"))
             .arg("--test")
             .arg(test_name);
+        if !self.required_features.is_empty() {
+            cmd.arg("--features").arg(self.required_features.join(","));
+        }
         cmd
     }
 
@@ -356,6 +365,9 @@ impl Example {
             .arg(format!("{root_dir}/Cargo.toml"))
             .arg("--example")
             .arg(example_name);
+        if !self.required_features.is_empty() {
+            cmd.arg("--features").arg(self.required_features.join(","));
+        }
         cmd
     }
 

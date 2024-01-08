@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.75.1 - Pending
+
+### Enhancements
+
+- parser: parse `required-features` from Cargo Metadata
+- command: compile Rust target with `required-features`
+- command: selectively list binary, example, integration test and unit test targets
+
 ## 1.75.0 - 2023-12-28
 
 ### New Features

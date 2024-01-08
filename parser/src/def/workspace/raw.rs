@@ -29,4 +29,6 @@ pub struct Target {
     pub kind: Vec<String>,
     pub name: String,
     pub src_path: String,
+    #[serde(default, rename(deserialize = "required-features"))]
+    pub required_features: Vec<String>,
 }
