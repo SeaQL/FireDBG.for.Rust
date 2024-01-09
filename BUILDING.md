@@ -35,7 +35,15 @@
     mv "codelldb-x86_64-linux/extension/lldb" "FireDBG.for.Rust/lldb"
     ```
 
-5. Building FireDBG binaries
+5. Testing FireDBG debugger
+
+    ```shell
+    cd FireDBG.for.Rust/debugger
+
+    cargo test
+    ```
+
+6. Building FireDBG binaries
 
     ```shell
     cd FireDBG.for.Rust
@@ -43,4 +51,32 @@
     cargo build --manifest-path "command/Cargo.toml"
     cargo build --manifest-path "indexer/Cargo.toml"
     cargo build --manifest-path "debugger/Cargo.toml"
+    ```
+
+6. Symbolic link the FireDBG binaries we just built
+
+    ```shell
+    ln -s "$PWD/target/debug/firedbg" ~/.cargo/bin/firedbg
+    ln -s "$PWD/target/debug/firedbg-indexer" ~/.cargo/bin/firedbg-indexer
+    ln -s "$PWD/target/debug/firedbg-debugger" ~/.cargo/bin/firedbg-debugger
+    ln -s "$PWD/lldb" ~/.cargo/bin/firedbg-lib
+    ```
+
+    Then, we should able to use FireDBG CLI
+
+    ```
+    $ firedbg
+
+    firedbg-cli
+        by SeaQL.org
+
+    _____ _          ____  ____   ____
+    |  ___(_)_ __ ___|  _ \| __ ) / ___|
+    | |_  | | '__/ _ \ | | |  _ \| |  _
+    |  _| | | | |  __/ |_| | |_) | |_| |
+    |_|   |_|_|  \___|____/|____/ \____|
+
+    Time Travel Visual Debugger for Rust
+    ====================================
+    ...
     ```
