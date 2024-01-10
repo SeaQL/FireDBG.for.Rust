@@ -53,7 +53,7 @@
     cargo build --manifest-path "debugger/Cargo.toml"
     ```
 
-6. Symbolic link the FireDBG binaries we just built
+7. Symbolic link the FireDBG binaries we just built
 
     ```shell
     ln -s "$PWD/target/debug/firedbg" ~/.cargo/bin/firedbg
@@ -70,7 +70,7 @@
     firedbg-cli
         by SeaQL.org
 
-    _____ _          ____  ____   ____
+     _____ _          ____  ____   ____
     |  ___(_)_ __ ___|  _ \| __ ) / ___|
     | |_  | | '__/ _ \ | | |  _ \| |  _
     |  _| | | | |  __/ |_| | |_) | |_| |
