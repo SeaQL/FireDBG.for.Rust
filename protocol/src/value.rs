@@ -10,7 +10,7 @@ use strum::{Display, EnumString};
 
 pub const STD_HASH_MAP: &str = "std::collections::hash::map::HashMap<";
 pub const STD_HASH_SET: &str = "std::collections::hash::set::HashSet<";
-pub const STD_HASH_STATE: &str = ", std::collections::hash::map::RandomState>";
+pub const STD_HASH_STATE: &str = ", std::hash::random::RandomState>";
 pub const CORE_REF_CELL: &str = "core::cell::RefCell<";
 pub const STD_MUTEX: &str = "std::sync::mutex::Mutex<";
 pub const STD_RWLOCK: &str = "std::sync::rwlock::RwLock<";
