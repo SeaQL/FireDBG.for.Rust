@@ -34,7 +34,7 @@ async fn main() -> Result<()> {
             std::str::from_utf8(b)
         }
         fn string_from_utf8(b: Vec<u8>) -> Result<String, std::string::FromUtf8Error> {
-            String::from_utf8(b)
+            std::hint::black_box(String::from_utf8(b))
         }
         fn result_boxed(i: i32) -> Result<Box<String>, ()> {
             if i == 0 {
