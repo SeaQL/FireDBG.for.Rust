@@ -12,8 +12,10 @@
 //! | `file` | Json | SourceFile: relative path to the source file |
 //! | `breakpoint` | Json | Breakpoint: breakpoints created and the source location |
 //! | `event` | Binary | Event: function call, function return, etc |
+//! | `allocation` | Json | Allocation: allocations and deallocations |
 pub use indexmap::IndexMap;
 
+pub mod allocation;
 pub mod breakpoint;
 pub mod event;
 pub mod info;

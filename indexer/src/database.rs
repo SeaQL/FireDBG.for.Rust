@@ -8,6 +8,7 @@ use sea_orm::{
 use sea_streamer::file::AsyncFile;
 
 use crate::entity::{
+    allocation::{self, Entity as Allocation},
     breakpoint::{self, Entity as Breakpoint},
     debugger_info::{self, Entity as DebuggerInfo},
     event::{self, Entity as Event},
@@ -89,6 +90,10 @@ pub async fn create_tables(db: &DbConn) -> Result<(), DbErr> {
     db.execute(stmt).await?;
 
     let stmt = builder.build(&schema.create_table_from_entity(TypeInfo));
+    log::debug!("{stmt}");
+    db.execute(stmt).await?;
+
+    let stmt = builder.build(&schema.create_table_from_entity(Allocation));
     log::debug!("{stmt}");
     db.execute(stmt).await?;
 
@@ -210,5 +215,17 @@ pub async fn insert_type_info(
         .exec(db.db())
         .await?;
 
+    Ok(())
+}
+
+pub async fn insert_allocations(
+    db: &Database,
+    allocations: impl Iterator<Item = allocation::ActiveModel>,
+) -> Result<(), DbErr> {
+    let res = Allocation::insert_many(allocations)
+        .on_empty_do_nothing()
+        .exec(db.db())
+        .await?;
+    log::debug!("Allocation::insert_many: {:?}", res);
     Ok(())
 }

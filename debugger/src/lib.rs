@@ -111,4 +111,4 @@ pub use reader::*;
 use rvalue::*;
 use value::*;
 
-pub use firedbg_protocol::{breakpoint::*, event::*, info::*, source::*, value::*};
+pub use firedbg_protocol::{allocation::*, breakpoint::*, event::*, info::*, source::*, value::*};

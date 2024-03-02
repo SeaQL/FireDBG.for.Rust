@@ -1,4 +1,5 @@
 use crate::entity::{
+    allocation::ActiveModel as Allocation,
     breakpoint::{self, Model as Breakpoint},
     debugger_info::ActiveModel as DebuggerInfo,
     event::{ActiveModel as Event, EventType},
@@ -6,8 +7,9 @@ use crate::entity::{
     type_info::Model as TypeInfo,
 };
 use firedbg_rust_debugger::{
-    Breakpoint as SrcBreakPoint, DebuggerInfo as SrcDebuggerInfo, Event as SrcEvent,
-    InfoMessage as SrcInfoMessage, ProgExitInfo as SrcProgExitInfo, RValue, Reason, SourceFile,
+    Allocation as SrcAllocation, Breakpoint as SrcBreakPoint, DebuggerInfo as SrcDebuggerInfo,
+    Event as SrcEvent, InfoMessage as SrcInfoMessage, ProgExitInfo as SrcProgExitInfo, RValue,
+    Reason, SourceFile,
 };
 use sea_orm::{prelude::DateTimeUtc, IntoActiveModel, NotSet, Set};
 use sea_streamer::Timestamp;
@@ -198,18 +200,34 @@ pub fn event(timestamp: Timestamp, event: SrcEvent) -> Event {
 pub fn type_info<F: FnMut(TypeInfo)>(event: &SrcEvent, mut push: F) {
     match event {
         SrcEvent::Breakpoint { locals, .. } => {
-            locals.iter().for_each(|(_, v)| push(type_info_of(v)));
+            locals.iter().for_each(|(_, v)| {
+                if let Some(ty) = type_info_of(v) {
+                    push(ty);
+                }
+            });
         }
         SrcEvent::FunctionCall { arguments, .. } => {
-            arguments.iter().for_each(|(_, v)| push(type_info_of(v)));
+            arguments.iter().for_each(|(_, v)| {
+                if let Some(ty) = type_info_of(v) {
+                    push(ty);
+                }
+            });
         }
-        SrcEvent::FunctionReturn { return_value, .. } => push(type_info_of(return_value)),
+        SrcEvent::FunctionReturn { return_value, .. } => {
+            if let Some(ty) = type_info_of(return_value) {
+                push(ty);
+            }
+        }
     }
 }
 
-fn type_info_of(value: &RValue) -> TypeInfo {
-    TypeInfo {
-        type_name: value.typename(),
+fn type_info_of(value: &RValue) -> Option<TypeInfo> {
+    let type_name = value.typename();
+    if type_name.starts_with("alloc::") {
+        return None;
+    }
+    Some(TypeInfo {
+        type_name,
         attributes: match value {
             RValue::Struct { fields, .. } => {
                 let mut s = "[".to_string();
@@ -222,6 +240,21 @@ fn type_info_of(value: &RValue) -> TypeInfo {
             RValue::Union { typeinfo, .. } => Some(json_stringify(&typeinfo.variants)),
             _ => None,
         },
+    })
+}
+
+pub fn allocation(bp: SrcAllocation) -> Allocation {
+    let SrcAllocation {
+        action,
+        address,
+        type_name,
+    } = bp;
+
+    Allocation {
+        id: NotSet,
+        action: Set(action.to_string()),
+        address: Set(address as i64),
+        type_name: Set(type_name),
     }
 }
 

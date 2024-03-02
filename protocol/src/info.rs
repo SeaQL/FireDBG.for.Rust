@@ -9,6 +9,7 @@ pub const INFO_STREAM: &str = "info";
 pub const FILE_STREAM: &str = "file";
 pub const BREAKPOINT_STREAM: &str = "breakpoint";
 pub const EVENT_STREAM: &str = "event";
+pub const ALLOCATION_STREAM: &str = "allocation";
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type")]

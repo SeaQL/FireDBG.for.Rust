@@ -10,12 +10,13 @@ use std::collections::HashMap;
 use structopt::StructOpt;
 
 use firedbg_rust_debugger::{
-    Event, EventStream, BREAKPOINT_STREAM, EVENT_STREAM, FILE_STREAM, INFO_STREAM,
+    Event, EventStream, ALLOCATION_STREAM, BREAKPOINT_STREAM, EVENT_STREAM, FILE_STREAM,
+    INFO_STREAM,
 };
 use firedbg_stream_indexer::{
     database::{
-        insert_breakpoints, insert_events, insert_files, insert_type_info, save_debugger_info,
-        Database,
+        insert_allocations, insert_breakpoints, insert_events, insert_files, insert_type_info,
+        save_debugger_info, Database,
     },
     translate,
     util::{deser, deser_info},
@@ -94,11 +95,18 @@ async fn run<P: Processor>(input: FileId, mut processor: P) -> Result<()> {
     let file_stream = StreamKey::new(FILE_STREAM)?;
     let event_stream = StreamKey::new(EVENT_STREAM)?;
     let breakpoint_stream = StreamKey::new(BREAKPOINT_STREAM)?;
+    let alloc_stream = StreamKey::new(ALLOCATION_STREAM)?;
 
     let mut options = SeaConsumerOptions::new(ConsumerMode::RealTime);
     options.set_auto_stream_reset(SeaStreamReset::Earliest);
 
-    let stream_keys = [info_stream, file_stream, event_stream, breakpoint_stream];
+    let stream_keys = [
+        info_stream,
+        file_stream,
+        event_stream,
+        breakpoint_stream,
+        alloc_stream,
+    ];
     let consumer = streamer.create_consumer(&stream_keys, options).await?;
 
     // From sea-streamer/examples/buffered
@@ -154,6 +162,7 @@ impl Processor for DatabaseSink {
         let mut bps = Vec::new();
         let mut events = Vec::new();
         let mut types = Vec::new();
+        let mut allocs = Vec::new();
         let mut flush = false;
 
         for message in messages {
@@ -198,6 +207,7 @@ impl Processor for DatabaseSink {
                     event.parent_frame_id = sea_orm::Set(parent_frame_id.map(|s| s as i64));
                     event
                 }),
+                ALLOCATION_STREAM => allocs.push(deser(&message)),
                 _ => anyhow::bail!("Unexpected stream key {}", message.stream_key()),
             }
             self.count += 1;
@@ -208,6 +218,7 @@ impl Processor for DatabaseSink {
         insert_breakpoints(&self.db, bps.into_iter().map(translate::breakpoint)).await?;
         insert_events(&self.db, events.into_iter()).await?;
         insert_type_info(&self.db, types.into_iter()).await?;
+        insert_allocations(&self.db, allocs.into_iter().map(translate::allocation)).await?;
 
         if flush {
             // this flushes the WAL and makes the data queryable

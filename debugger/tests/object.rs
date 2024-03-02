@@ -3,8 +3,8 @@ use util::*;
 
 use anyhow::Result;
 use firedbg_rust_debugger::{
-    Breakpoint, BreakpointType, Bytes, Debugger, DebuggerParams, Event, EventStream, LineColumn,
-    RValue, SourceFile, VariableCapture,
+    AllocAction, Allocation, Breakpoint, BreakpointType, Bytes, Debugger, DebuggerParams, Event,
+    EventStream, LineColumn, RValue, SourceFile, VariableCapture,
 };
 use pretty_assertions::assert_eq;
 use sea_streamer::{Buffer, Consumer, Message, Producer};
@@ -13,7 +13,7 @@ use std::time::SystemTime;
 #[tokio::test]
 async fn main() -> Result<()> {
     let testcase = "object";
-    let (producer, consumer) = setup(testcase).await?;
+    let (producer, events, allocations) = setup_2(testcase).await?;
 
     rustc(&format!("testcases/{testcase}"));
 
@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
     );
 
     producer.end().await?;
-    let payload = consumer.next().await?.message().into_bytes();
+    let payload = events.next().await?.message().into_bytes();
     let event = EventStream::read_from(Bytes::from(payload));
     match event {
         Event::Breakpoint { locals, .. } => {
@@ -87,6 +87,24 @@ async fn main() -> Result<()> {
             }
         }
         other => panic!("Unexpected {other:?}"),
+    }
+
+    let mut addr = 0;
+
+    for i in 0..2 {
+        let message = allocations.next().await?;
+        let message = message.message();
+        let message = message.as_str()?;
+        let alloc: Allocation = serde_json::from_str(message)?;
+        assert_eq!(alloc.type_name, "object::Car");
+        if i == 0 {
+            assert_eq!(alloc.action, AllocAction::Alloc);
+            addr = alloc.address;
+        } else {
+            assert_eq!(alloc.action, AllocAction::Drop);
+            assert_eq!(alloc.address, addr);
+        }
+        println!("{alloc:?}");
     }
 
     Ok(())

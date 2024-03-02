@@ -3,7 +3,7 @@
 
 use firedbg_rust_debugger::{
     new_breakpoint, DebuggerInfo, DebuggerParams, Event, FireDbgForRust, InfoMessage, SourceFile,
-    EVENT_STREAM, INFO_STREAM,
+    ALLOCATION_STREAM, EVENT_STREAM, INFO_STREAM,
 };
 use pretty_assertions::assert_eq;
 use sea_streamer::{
@@ -62,6 +62,13 @@ pub fn generate_rust_program(testcase: &str, content: &str) -> DebuggerParams {
 }
 
 pub async fn setup(testcase: &str) -> Result<(SeaProducer, SeaConsumer), SeaStreamerErr> {
+    let (_, producer, consumer) = setup_1(testcase).await?;
+    Ok((producer, consumer))
+}
+
+pub async fn setup_1(
+    testcase: &str,
+) -> Result<(SeaStreamer, SeaProducer, SeaConsumer), SeaStreamerErr> {
     create_env_logger();
 
     let file_id = temp_file(testcase).unwrap();
@@ -90,7 +97,17 @@ pub async fn setup(testcase: &str) -> Result<(SeaProducer, SeaConsumer), SeaStre
         .as_str(),
     )?;
 
-    Ok((producer, consumer))
+    Ok((streamer, producer, consumer))
+}
+
+pub async fn setup_2(
+    testcase: &str,
+) -> Result<(SeaProducer, SeaConsumer, SeaConsumer), SeaStreamerErr> {
+    let (streamer, producer, consumer_1) = setup_1(testcase).await?;
+    let consumer_2 = streamer
+        .create_consumer(&[StreamKey::new(ALLOCATION_STREAM)?], Default::default())
+        .await?;
+    Ok((producer, consumer_1, consumer_2))
 }
 
 pub fn verify(testcase: &str, events: Vec<Event>, expected: Vec<Expected>) {

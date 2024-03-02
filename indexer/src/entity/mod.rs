@@ -1,3 +1,4 @@
+pub mod allocation;
 pub mod breakpoint;
 pub mod debugger_info;
 pub mod event;

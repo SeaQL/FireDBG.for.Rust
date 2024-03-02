@@ -17,8 +17,9 @@ pub use value_writer::*;
 use crate::{
     value::{read_str, RVal, Val},
     version::rustc_version,
-    ActiveFrame, Breakpoint, BreakpointType, Bytes, EventStream, SourceFile, UnionType,
-    VariableCapture, WriteErr, BREAKPOINT_STREAM, EVENT_STREAM, FILE_STREAM, INFO_STREAM,
+    ActiveFrame, AllocAction, AllocationBorrowed, Breakpoint, BreakpointType, Bytes, EventStream,
+    SourceFile, UnionType, VariableCapture, WriteErr, ALLOCATION_STREAM, BREAKPOINT_STREAM,
+    EVENT_STREAM, FILE_STREAM, INFO_STREAM,
 };
 use anyhow::{Context, Result};
 use firedbg_protocol::{
@@ -84,6 +85,7 @@ pub const FIREDBG_SOURCE_FILE_ID: u32 = 0;
 pub const RUST_PANIC_BP_ID: BpId = BpId(1);
 pub const FIREDBG_TRACE_BP_ID: BpId = BpId(2);
 pub const EXCHANGE_MALLOC: BpId = BpId(3);
+pub const DROP_IN_PLACE: BpId = BpId(4);
 
 const RET: &str = {
     #[cfg(target_arch = "x86_64")]
@@ -173,14 +175,20 @@ fn run(mut params: DebuggerParams, mut producer: SeaProducer) -> Result<()> {
     let mut functions_disassembled: FxHashMap<u64, FuncAsm> = Default::default();
     // File address -> Breakpoint
     let mut breakpoint_addresses: FxHashMap<u64, BpId> = Default::default();
-    // memory address -> SBType name
+    // memory address -> type name
     let mut allocation: FxHashMap<u64, String> = Default::default();
     let mut fn_cache: FunctionCache = Default::default();
 
-    let event_stream = StreamKey::new(EVENT_STREAM)
-        .with_context(|| format!("Fail to create StreamKey: `{EVENT_STREAM}`"))?;
-    let bp_stream = StreamKey::new(BREAKPOINT_STREAM)
-        .with_context(|| format!("Fail to create StreamKey: `{BREAKPOINT_STREAM}`"))?;
+    let bp_stream = StreamKey::new(BREAKPOINT_STREAM)?;
+    let event_stream = StreamKey::new(EVENT_STREAM)?;
+    let alloc_stream = StreamKey::new(ALLOCATION_STREAM)?;
+
+    let send_breakpoint = |bp: &Breakpoint| -> Result<()> {
+        producer
+            .send_to(&bp_stream, serde_json::to_string(bp)?)
+            .context("Fail to send breakpoint")?;
+        Ok(())
+    };
 
     {
         // Set `rust_panic` (dummy) source file
@@ -197,26 +205,32 @@ fn run(mut params: DebuggerParams, mut producer: SeaProducer) -> Result<()> {
         }
     }
 
-    std::mem::drop(t_init);
+    std::mem::drop(t_init); // end timer
 
     let t_set_breakpoint = process_timer.set_breakpoint.span();
 
     let sb_bp = sb_target.breakpoint_create_by_name("rust_panic");
     let breakpoint = get_rust_panic_breakpoint();
-    send_breakpoint(&producer, &bp_stream, &breakpoint)?;
+    send_breakpoint(&breakpoint)?;
     register_breakpoint(&mut breakpoint_addresses, &sb_bp);
     breakpoints.push(breakpoint);
 
     let sb_bp = sb_target.breakpoint_create_by_regex("firedbg_lib::__firedbg_trace__");
     let breakpoint = get_firedbg_trace_breakpoint();
-    send_breakpoint(&producer, &bp_stream, &breakpoint)?;
+    send_breakpoint(&breakpoint)?;
     register_breakpoint(&mut breakpoint_addresses, &sb_bp);
     breakpoints.push(breakpoint);
 
     if !*DONT_TRACE_ALLOCATION {
         let sb_bp = sb_target.breakpoint_create_by_name("alloc::alloc::exchange_malloc");
         let breakpoint = get_exchange_malloc_breakpoint();
-        send_breakpoint(&producer, &bp_stream, &breakpoint)?;
+        send_breakpoint(&breakpoint)?;
+        register_breakpoint(&mut breakpoint_addresses, &sb_bp);
+        breakpoints.push(breakpoint);
+
+        let sb_bp = sb_target.breakpoint_create_by_name("core::ptr::drop_in_place");
+        let breakpoint = get_drop_in_place_breakpoint();
+        send_breakpoint(&breakpoint)?;
         register_breakpoint(&mut breakpoint_addresses, &sb_bp);
         breakpoints.push(breakpoint);
     }
@@ -282,7 +296,7 @@ fn run(mut params: DebuggerParams, mut producer: SeaProducer) -> Result<()> {
         }
         bp.id = breakpoints.len() as u32;
         if sb_bp.num_locations() > 0 {
-            send_breakpoint(&producer, &bp_stream, &bp)?;
+            send_breakpoint(&bp)?;
         }
         breakpoints.push(bp);
     }
@@ -483,7 +497,7 @@ fn run(mut params: DebuggerParams, mut producer: SeaProducer) -> Result<()> {
                                     capture: VariableCapture::None,
                                     ..Default::default()
                                 };
-                                send_breakpoint(&producer, &bp_stream, &bp)?;
+                                send_breakpoint(&bp)?;
                                 breakpoints.push(bp);
                                 ret_loc += 1;
                             }
@@ -566,7 +580,7 @@ fn run(mut params: DebuggerParams, mut producer: SeaProducer) -> Result<()> {
                                                     ]),
                                                     ..Default::default()
                                                 };
-                                                send_breakpoint(&producer, &bp_stream, &bp)?;
+                                                send_breakpoint(&bp)?;
                                                 breakpoints.push(bp);
                                             }
                                             break;
@@ -612,16 +626,89 @@ fn run(mut params: DebuggerParams, mut producer: SeaProducer) -> Result<()> {
                         });
                         let addr = read_u64(&rax)?;
                         if allocating.is_some() {
-                            let fmt_addr = crate::Addr::new(&addr.to_ne_bytes());
                             log::debug!(
-                                "Allocation {} -> {}",
-                                fmt_addr,
-                                allocating.as_ref().unwrap()
+                                "exchange_malloc {} -> {}",
+                                crate::Addr::new(&addr.to_ne_bytes()),
+                                allocating.as_ref().unwrap(),
                             );
-                            allocation.insert(addr, allocating.take().unwrap());
+                            let ty_name = allocating.take().unwrap();
+                            producer
+                                .send_to(
+                                    &alloc_stream,
+                                    serde_json::to_string(&AllocationBorrowed {
+                                        action: AllocAction::Alloc,
+                                        address: addr,
+                                        type_name: &ty_name,
+                                    })?,
+                                )
+                                .context("Fail to send allocation event")?;
+                            allocation.insert(addr, ty_name);
                         }
                     } else {
                         log::warn!("Unhandled breakpoint VariableCapture::Only({only:?})");
+                    }
+                    return Ok(());
+                }
+                VariableCapture::Arguments if bp_id == DROP_IN_PLACE => {
+                    for var in sb_frame
+                        .variables(&VariableOptions {
+                            arguments: true,
+                            locals: false,
+                            statics: false,
+                            in_scope_only: true,
+                        })
+                        .iter()
+                    {
+                        let addr = var.dereference().address();
+                        if addr.is_none() {
+                            continue;
+                        }
+                        let addr = addr.unwrap().load_address(sb_target);
+                        if let Some(ty_name) = allocation.remove(&addr) {
+                            #[cfg(debug_assertions)]
+                            {
+                                let sb_type = var.type_();
+                                assert!(sb_type.name().contains(&ty_name));
+                            }
+                            producer
+                                .send_to(
+                                    &alloc_stream,
+                                    serde_json::to_string(&AllocationBorrowed {
+                                        action: AllocAction::Drop,
+                                        address: addr,
+                                        type_name: &ty_name,
+                                    })?,
+                                )
+                                .context("Fail to send allocation event")?;
+                            log::debug!(
+                                " drop_in_place  {} -> {}",
+                                crate::Addr::new(&addr.to_ne_bytes()),
+                                ty_name
+                            );
+                        } else if let Some(ty_name) = allocation.get(&(addr - 0x10)) {
+                            // the allocation happens at the base address of the RcBox, but the drop happens at the data address
+                            if ty_name.starts_with("alloc::rc::RcBox<")
+                                || ty_name.starts_with("alloc::sync::ArcInner<")
+                            {
+                                let ty_name = allocation.remove(&(addr - 0x10)).unwrap();
+                                producer
+                                    .send_to(
+                                        &alloc_stream,
+                                        serde_json::to_string(&AllocationBorrowed {
+                                            action: AllocAction::Drop,
+                                            address: addr - 0x10,
+                                            type_name: &ty_name,
+                                        })?,
+                                    )
+                                    .context("Fail to send allocation event")?;
+                                log::debug!(
+                                    " drop_in_place  {} -> {}",
+                                    crate::Addr::new(&addr.to_ne_bytes()),
+                                    ty_name
+                                );
+                            }
+                        }
+                        break;
                     }
                     return Ok(());
                 }
@@ -767,8 +854,7 @@ fn run(mut params: DebuggerParams, mut producer: SeaProducer) -> Result<()> {
     let exit_code = sb_process.exit_status();
 
     producer.send_to(
-        &StreamKey::new(INFO_STREAM)
-            .with_context(|| format!("Fail to create StreamKey: `{INFO_STREAM}`"))?,
+        &StreamKey::new(INFO_STREAM)?,
         serde_json::to_string(&InfoMessage::Exit(ProgExitInfo { exit_code }))?.as_str(),
     )?;
 
@@ -1048,13 +1134,6 @@ fn register_breakpoint(breakpoint_addresses: &mut FxHashMap<u64, BpId>, sb_bp: &
     }
 }
 
-fn send_breakpoint(producer: &SeaProducer, key: &StreamKey, bp: &Breakpoint) -> Result<()> {
-    producer
-        .send_to(key, serde_json::to_string(bp)?)
-        .context("Fail to steam breakpoint")?;
-    Ok(())
-}
-
 fn get_rust_panic_source_file() -> SourceFile {
     SourceFile {
         id: FIREDBG_SOURCE_FILE_ID,
@@ -1089,6 +1168,17 @@ fn get_firedbg_trace_breakpoint() -> Breakpoint {
 fn get_exchange_malloc_breakpoint() -> Breakpoint {
     Breakpoint {
         id: EXCHANGE_MALLOC.0,
+        file_id: FIREDBG_SOURCE_FILE_ID,
+        loc: Default::default(),
+        loc_end: Default::default(),
+        breakpoint_type: BreakpointType::Breakpoint,
+        capture: VariableCapture::Arguments,
+    }
+}
+
+fn get_drop_in_place_breakpoint() -> Breakpoint {
+    Breakpoint {
+        id: DROP_IN_PLACE.0,
         file_id: FIREDBG_SOURCE_FILE_ID,
         loc: Default::default(),
         loc_end: Default::default(),

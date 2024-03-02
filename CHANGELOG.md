@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.76.1 - Pending
+
+- debugger: trace allocations (Box, Arc, Rc)
+
 ## 1.76.0 - 2024-02-08
 
 ### Versions

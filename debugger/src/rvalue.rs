@@ -55,8 +55,8 @@ impl RValueLift for RValue {
                     || typename.starts_with("alloc::boxed::Box<dyn ")
                 {
                     if fields.get("pointer").is_some() && fields.get("vtable").is_some() {
-                        let pointer = fields.remove("pointer");
-                        let vtable = fields.remove("vtable");
+                        let pointer = fields.swap_remove("pointer");
+                        let vtable = fields.swap_remove("vtable");
                         if let (Some(pointer), Some(vtable)) = (pointer, vtable) {
                             *self = Self::DynRef {
                                 typename: std::mem::take(typename),
@@ -72,11 +72,11 @@ impl RValueLift for RValue {
                 } else if typename.starts_with("alloc::sync::Arc<dyn ")
                     || typename.starts_with("alloc::rc::Rc<dyn ")
                 {
-                    if let Some(value) = fields.remove("ptr") {
+                    if let Some(value) = fields.swap_remove("ptr") {
                         if let Some(value) = take_struct_field(value, "pointer") {
                             if let Self::Struct { mut fields, .. } = value {
-                                let pointer = fields.remove("pointer");
-                                let vtable = fields.remove("vtable");
+                                let pointer = fields.swap_remove("pointer");
+                                let vtable = fields.swap_remove("vtable");
                                 if let (Some(pointer), Some(vtable)) = (pointer, vtable) {
                                     if let Self::Ref { addr, value, .. } = pointer {
                                         let extract = |name: &str| -> Option<u64> {
@@ -133,7 +133,7 @@ impl RValueLift for RValue {
                 } else if typename.starts_with("alloc::sync::Arc<")
                     || typename.starts_with("alloc::rc::Rc<")
                 {
-                    if let Some(value) = fields.remove("ptr") {
+                    if let Some(value) = fields.swap_remove("ptr") {
                         let value = take_struct_field(value, "pointer")?;
                         if let Self::Ref { addr, value, .. } = value {
                             let extract = |name: &str| -> Option<u64> {
@@ -187,7 +187,7 @@ impl RValueLift for RValue {
                     *self = Self::Option {
                         typename: typeinfo.name.to_owned(),
                         variant: std::mem::take(variant),
-                        value: if let Some(field) = fields.remove("0") {
+                        value: if let Some(field) = fields.swap_remove("0") {
                             Some(Box::new(field))
                         } else if fields.contains_key("<>") {
                             Some(Box::new(Self::Opaque))
@@ -199,7 +199,7 @@ impl RValueLift for RValue {
                     *self = Self::Result {
                         typename: typeinfo.name.to_owned(),
                         variant: std::mem::take(variant),
-                        value: Box::new(fields.remove("0").unwrap_or(Self::Opaque)),
+                        value: Box::new(fields.swap_remove("0").unwrap_or(Self::Opaque)),
                     }
                 }
             }
@@ -219,7 +219,7 @@ impl RValueLift for RValue {
 
 fn take_struct_field(value: RValue, field: &str) -> Option<RValue> {
     if let RValue::Struct { mut fields, .. } = value {
-        fields.remove(field)
+        fields.swap_remove(field)
     } else {
         None
     }
