@@ -9,8 +9,8 @@ use crate::{
     Processor,
 };
 use firedbg_rust_debugger::{
-    Breakpoint, Event, EventStream, InfoMessage, SourceFile, BREAKPOINT_STREAM, EVENT_STREAM,
-    FILE_STREAM, INFO_STREAM,
+    Breakpoint, Event, EventStream, InfoMessage, SourceFile, ALLOCATION_STREAM, BREAKPOINT_STREAM,
+    EVENT_STREAM, FILE_STREAM, INFO_STREAM,
 };
 
 #[derive(Debug, Default, Serialize, Deserialize)]
@@ -57,6 +57,7 @@ impl Processor for Validator {
                     event.redacted();
                     self.data.events.push(event);
                 }
+                ALLOCATION_STREAM => {}
                 _ => anyhow::bail!("Unexpected stream key {}", message.stream_key()),
             }
         }

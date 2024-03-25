@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.77.0 - Pending
+
++ `1.77.0-beta.1`: 2024-03-25
+
 ## 1.76.1 - Pending
 
 - debugger: trace allocations (Box, Arc, Rc)
