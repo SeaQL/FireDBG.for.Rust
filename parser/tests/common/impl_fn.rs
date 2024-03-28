@@ -87,6 +87,10 @@ pub fn get_breakpoints() -> Vec<FunctionDef> {
                     column: Some(9),
                 },
             },
+            end: LineColumn {
+                line: 6,
+                column: Some(5),
+            },
         },
         FunctionDef {
             ty: FunctionType::ImplFn {
@@ -105,6 +109,10 @@ pub fn get_breakpoints() -> Vec<FunctionDef> {
                     line: 17,
                     column: Some(9),
                 },
+            },
+            end: LineColumn {
+                line: 18,
+                column: Some(5),
             },
         },
         FunctionDef {
@@ -125,6 +133,10 @@ pub fn get_breakpoints() -> Vec<FunctionDef> {
                     column: Some(9),
                 },
             },
+            end: LineColumn {
+                line: 22,
+                column: Some(5),
+            },
         },
         FunctionDef {
             ty: FunctionType::ImplFn {
@@ -143,6 +155,10 @@ pub fn get_breakpoints() -> Vec<FunctionDef> {
                     line: 29,
                     column: Some(9),
                 },
+            },
+            end: LineColumn {
+                line: 30,
+                column: Some(5),
             },
         },
         FunctionDef {
@@ -163,6 +179,10 @@ pub fn get_breakpoints() -> Vec<FunctionDef> {
                     column: Some(13),
                 },
             },
+            end: LineColumn {
+                line: 41,
+                column: Some(9),
+            },
         },
         FunctionDef {
             ty: FunctionType::ImplFn {
@@ -181,6 +201,10 @@ pub fn get_breakpoints() -> Vec<FunctionDef> {
                     line: 49,
                     column: Some(17),
                 },
+            },
+            end: LineColumn {
+                line: 50,
+                column: Some(13),
             },
         },
         FunctionDef {
@@ -201,6 +225,10 @@ pub fn get_breakpoints() -> Vec<FunctionDef> {
                     column: Some(13),
                 },
             },
+            end: LineColumn {
+                line: 59,
+                column: Some(9),
+            },
         },
         FunctionDef {
             ty: FunctionType::ImplFn {
@@ -219,6 +247,10 @@ pub fn get_breakpoints() -> Vec<FunctionDef> {
                     line: 61,
                     column: Some(37),
                 },
+            },
+            end: LineColumn {
+                line: 63,
+                column: Some(9),
             },
         },
     ]

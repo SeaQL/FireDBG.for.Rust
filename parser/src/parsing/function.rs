@@ -1,4 +1,7 @@
-use crate::{parsing::parse_body_loc, FunctionDef, FunctionType};
+use crate::{
+    parsing::{parse_body_end, parse_body_loc},
+    FunctionDef, FunctionType,
+};
 use syn::__private::ToTokens;
 
 // Parse function breakpoints
@@ -35,7 +38,8 @@ impl ParseFunction for syn::ItemFn {
             return_type,
         };
         let loc = parse_body_loc(&self.block);
-        let parent_breakpoint = FunctionDef { ty, loc };
+        let end = parse_body_end(&self.block);
+        let parent_breakpoint = FunctionDef { ty, loc, end };
         parse_nested_func(parent_breakpoint, &self.block)
     }
 }
@@ -84,7 +88,8 @@ impl ParseFunction for (&syn::ItemImpl, &syn::ImplItemFn) {
             },
         };
         let loc = parse_body_loc(&impl_item_fn.block);
-        let parent_breakpoint = FunctionDef { ty, loc };
+        let end = parse_body_end(&impl_item_fn.block);
+        let parent_breakpoint = FunctionDef { ty, loc, end };
         parse_nested_func(parent_breakpoint, &impl_item_fn.block)
     }
 }
@@ -124,7 +129,8 @@ impl ParseFunction for (&syn::ItemTrait, &syn::TraitItemFn) {
                     return_type,
                 };
                 let loc = parse_body_loc(block);
-                let parent_breakpoint = FunctionDef { ty, loc };
+                let end = parse_body_end(block);
+                let parent_breakpoint = FunctionDef { ty, loc, end };
                 parse_nested_func(parent_breakpoint, block)
             }
             None => Vec::new(),

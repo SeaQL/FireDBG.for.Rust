@@ -62,6 +62,7 @@ async fn parse_example_workspace() -> anyhow::Result<()> {
                                 "/tests/example-workspace/main-one/src/main.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Binary {
                             name: "another_main".into(),
@@ -70,6 +71,7 @@ async fn parse_example_workspace() -> anyhow::Result<()> {
                                 "/tests/example-workspace/main-one/src/bin/another_main.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                     ],
                     tests: vec![Test {
@@ -79,6 +81,7 @@ async fn parse_example_workspace() -> anyhow::Result<()> {
                             "/tests/example-workspace/main-one/tests/simple_tests.rs"
                         )
                         .into(),
+                        required_features: vec![],
                     }],
                     examples: vec![Example {
                         name: "demo".into(),
@@ -87,6 +90,7 @@ async fn parse_example_workspace() -> anyhow::Result<()> {
                             "/tests/example-workspace/main-one/examples/demo.rs"
                         )
                         .into(),
+                        required_features: vec![],
                     }],
                     has_lib: true,
                 },
@@ -107,6 +111,7 @@ async fn parse_example_workspace() -> anyhow::Result<()> {
                                 "/tests/example-workspace/main-two/src/renamed-main.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Binary {
                             name: "hyphenated-main".into(),
@@ -115,6 +120,7 @@ async fn parse_example_workspace() -> anyhow::Result<()> {
                                 "/tests/example-workspace/main-two/src/bin/hyphenated-main.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                     ],
                     tests: vec![],
@@ -137,6 +143,7 @@ async fn parse_example_workspace() -> anyhow::Result<()> {
                             "/tests/example-workspace/quick-sort/src/main.rs"
                         )
                         .into(),
+                        required_features: vec![],
                     }],
                     tests: vec![],
                     examples: vec![],
@@ -161,7 +168,10 @@ async fn parse_example_workspace() -> anyhow::Result<()> {
     // /Applications/MAMP/htdocs/FireDBG.for.Rust.Internal/parser/tests/example-workspace/target/debug/main-one
     println!("binary_path {}", main_one.get_binary_path(&workspace));
     // /Applications/MAMP/htdocs/FireDBG.for.Rust.Internal/parser/tests/example-workspace/target/debug/deps/simple_tests-eb63f31f8208c8a4
-    println!("test_path {}", simple_tests.get_test_path(&workspace)?);
+    println!(
+        "test_path {}",
+        simple_tests.get_test_path(&workspace, &main_one_package)?
+    );
     // /Applications/MAMP/htdocs/FireDBG.for.Rust.Internal/parser/tests/example-workspace/target/debug/examples/demo
     println!("example_path {}", demo.get_example_path(&workspace));
 
@@ -192,6 +202,7 @@ async fn parse_example_without_workspace() -> anyhow::Result<()> {
                         "/tests/example-without-workspace/src/main.rs"
                     )
                     .into(),
+                    required_features: vec![],
                 }],
                 tests: vec![],
                 examples: vec![],
@@ -325,6 +336,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/benchmark/src/bin/producer.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Binary {
                             name: "relay".into(),
@@ -333,6 +345,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/benchmark/src/bin/relay.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Binary {
                             name: "consumer".into(),
@@ -341,6 +354,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/benchmark/src/bin/consumer.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                     ],
                     tests: vec![],
@@ -372,6 +386,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/examples/src/bin/resumable.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Binary {
                             name: "processor".into(),
@@ -380,6 +395,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/examples/src/bin/processor.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Binary {
                             name: "producer".into(),
@@ -388,6 +404,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/examples/src/bin/producer.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Binary {
                             name: "buffered".into(),
@@ -396,6 +413,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/examples/src/bin/buffered.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Binary {
                             name: "blocking".into(),
@@ -404,6 +422,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/examples/src/bin/blocking.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Binary {
                             name: "consumer".into(),
@@ -412,6 +431,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/examples/src/bin/consumer.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                     ],
                     tests: vec![],
@@ -456,6 +476,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-file/src/bin/clock.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Binary {
                             name: "decoder".into(),
@@ -464,6 +485,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-file/src/bin/decoder.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Binary {
                             name: "sink".into(),
@@ -472,6 +494,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-file/src/bin/sink.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Binary {
                             name: "tail".into(),
@@ -480,6 +503,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-file/src/bin/tail.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                     ],
                     tests: vec![
@@ -490,6 +514,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-file/tests/loopback.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Test {
                             name: "producer".into(),
@@ -498,6 +523,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-file/tests/producer.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Test {
                             name: "util".into(),
@@ -506,6 +532,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-file/tests/util.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Test {
                             name: "surveyor".into(),
@@ -514,6 +541,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-file/tests/surveyor.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Test {
                             name: "consumer".into(),
@@ -522,6 +550,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-file/tests/consumer.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                     ],
                     examples: vec![],
@@ -565,6 +594,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-kafka/src/bin/consumer.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Binary {
                             name: "producer".into(),
@@ -573,6 +603,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-kafka/src/bin/producer.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                     ],
                     tests: vec![Test {
@@ -582,6 +613,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                             "/tests/sea-streamer/sea-streamer-kafka/tests/consumer.rs"
                         )
                         .into(),
+                        required_features: vec![],
                     }],
                     examples: vec![],
                     has_lib: true,
@@ -624,6 +656,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-redis/src/bin/consumer.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Binary {
                             name: "producer".into(),
@@ -632,6 +665,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-redis/src/bin/producer.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                     ],
                     tests: vec![
@@ -642,6 +676,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-redis/tests/resumable.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Test {
                             name: "seek-rewind".into(),
@@ -650,6 +685,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-redis/tests/seek-rewind.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Test {
                             name: "consumer-group".into(),
@@ -658,6 +694,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-redis/tests/consumer-group.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Test {
                             name: "util".into(),
@@ -666,6 +703,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-redis/tests/util.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Test {
                             name: "realtime".into(),
@@ -674,6 +712,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-redis/tests/realtime.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Test {
                             name: "sharding".into(),
@@ -682,6 +721,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-redis/tests/sharding.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Test {
                             name: "load-balanced".into(),
@@ -690,6 +730,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-redis/tests/load-balanced.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                     ],
                     examples: vec![],
@@ -776,6 +817,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                             "/tests/sea-streamer/sea-streamer-socket/src/bin/relay.rs"
                         )
                         .into(),
+                        required_features: vec![],
                     }],
                     tests: vec![],
                     examples: vec![],
@@ -819,6 +861,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-stdio/src/bin/clock.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Binary {
                             name: "complex".into(),
@@ -827,6 +870,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-stdio/src/bin/complex.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Binary {
                             name: "relay".into(),
@@ -835,6 +879,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-stdio/src/bin/relay.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                     ],
                     tests: vec![
@@ -845,6 +890,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-stdio/tests/loopback.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                         Test {
                             name: "group".into(),
@@ -853,6 +899,7 @@ async fn parse_sea_streamer() -> anyhow::Result<()> {
                                 "/tests/sea-streamer/sea-streamer-stdio/tests/group.rs"
                             )
                             .into(),
+                            required_features: vec![],
                         },
                     ],
                     examples: vec![],

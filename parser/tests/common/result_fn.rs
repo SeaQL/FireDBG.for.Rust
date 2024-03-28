@@ -35,6 +35,10 @@ pub fn get_breakpoints() -> Vec<FunctionDef> {
                     column: Some(5),
                 },
             },
+            end: LineColumn {
+                line: 3,
+                column: Some(1),
+            },
         },
         FunctionDef {
             ty: FunctionType::FreeFn {
@@ -51,6 +55,10 @@ pub fn get_breakpoints() -> Vec<FunctionDef> {
                     line: 6,
                     column: Some(5),
                 },
+            },
+            end: LineColumn {
+                line: 7,
+                column: Some(1),
             },
         },
         FunctionDef {
@@ -69,6 +77,10 @@ pub fn get_breakpoints() -> Vec<FunctionDef> {
                     column: Some(5),
                 },
             },
+            end: LineColumn {
+                line: 11,
+                column: Some(1),
+            },
         },
         FunctionDef {
             ty: FunctionType::FreeFn {
@@ -85,6 +97,10 @@ pub fn get_breakpoints() -> Vec<FunctionDef> {
                     line: 14,
                     column: Some(5),
                 },
+            },
+            end: LineColumn {
+                line: 15,
+                column: Some(1),
             },
         },
     ]

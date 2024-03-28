@@ -12,7 +12,7 @@ pub(crate) fn parse_workspace(raw_workspace: raw::Workspace) -> Workspace {
 fn parse_packages(raw_packages: Vec<raw::Package>, workspace_root_dir: &str) -> Vec<Package> {
     let get_package_root_dir = |id: &str| -> String {
         let (_, after) = id.split_once("path+file://").expect("Have path");
-        let root_dir = after.chars().take_while(|c| ')'.ne(c)).collect();
+        let root_dir = after.chars().take_while(|c| '#'.ne(c)).collect();
         root_dir
     };
     raw_packages
@@ -22,7 +22,7 @@ fn parse_packages(raw_packages: Vec<raw::Package>, workspace_root_dir: &str) -> 
             let version = &raw_package.version;
             let package_id = &raw_package.id;
             // Is local package
-            if package_id.starts_with(&format!("{name} {version} (path+file://")) {
+            if package_id.starts_with("path+file://") {
                 let root_dir = get_package_root_dir(&package_id);
                 // Is within the root workspace directory
                 if root_dir.starts_with(workspace_root_dir) {

@@ -9,6 +9,10 @@ pub(crate) fn parse_body_loc(block: &syn::Block) -> BreakableSpan {
     }
 }
 
+pub(crate) fn parse_body_end(block: &syn::Block) -> LineColumn {
+    block.span().end().into_loc()
+}
+
 /// Parse the line and column number of function block.
 ///
 /// A function block is wrapped in a pair of braces, i.e. `{ ... }`

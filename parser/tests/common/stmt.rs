@@ -160,6 +160,10 @@ pub fn get_breakpoints() -> Vec<FunctionDef> {
                     column: Some(5),
                 },
             },
+            end: LineColumn {
+                line: 140,
+                column: Some(1),
+            },
         },
         FunctionDef {
             ty: FunctionType::NestedFn {
@@ -177,6 +181,10 @@ pub fn get_breakpoints() -> Vec<FunctionDef> {
                     line: 90,
                     column: Some(13),
                 },
+            },
+            end: LineColumn {
+                line: 96,
+                column: Some(9),
             },
         },
         FunctionDef {
@@ -196,6 +204,10 @@ pub fn get_breakpoints() -> Vec<FunctionDef> {
                     column: Some(13),
                 },
             },
+            end: LineColumn {
+                line: 109,
+                column: Some(9),
+            },
         },
         FunctionDef {
             ty: FunctionType::NestedFn {
@@ -214,6 +226,10 @@ pub fn get_breakpoints() -> Vec<FunctionDef> {
                     column: Some(13),
                 },
             },
+            end: LineColumn {
+                line: 120,
+                column: Some(9),
+            },
         },
         FunctionDef {
             ty: FunctionType::NestedFn {
@@ -231,6 +247,10 @@ pub fn get_breakpoints() -> Vec<FunctionDef> {
                     line: 134,
                     column: Some(9),
                 },
+            },
+            end: LineColumn {
+                line: 137,
+                column: Some(5),
             },
         },
     ]

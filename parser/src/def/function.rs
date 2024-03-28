@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 pub struct FunctionDef {
     pub ty: FunctionType,
     pub loc: BreakableSpan,
+    pub end: LineColumn,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

@@ -599,23 +599,47 @@ pub(super) fn write_return_value(
                             None
                         };
                         event.write_option(rwriter, RETVAL, return_type.name(), value);
+                    } else if matches!(left, ValueType::i128 | ValueType::u128) {
+                        let val = {
+                            #[cfg(target_arch = "x86_64")]
+                            {
+                                let rdx_u64 = read_u64(&rdx())?;
+                                let rcx_u64 = read_u64(&rcx())?;
+                                let res_is_rcx = (rdx_u64 == 0 && rcx_u64 == 1)
+                                    || (rdx_u64 == 0 && rcx_u64 == 0);
+                                if res_is_rcx && (read_u64(&rdx())? & 0xF) != 0 {
+                                    let v = {
+                                        let v = [reg("rsi"), reg("r8")];
+                                        &values_to_bytes::<16, _>(v.into_iter(), 2)?
+                                    };
+                                    Some(rwriter.prim_v(left.primitive_name(), v))
+                                } else if !res_is_rcx && (read_u64(&rdx())? & 0xF) != 0 {
+                                    let v = {
+                                        let v = [reg("rdi"), reg("r8")];
+                                        &values_to_bytes::<16, _>(v.into_iter(), 2)?
+                                    };
+                                    Some(rwriter.prim_v(left.primitive_name(), v))
+                                } else {
+                                    None
+                                }
+                            }
+                            #[cfg(target_arch = "aarch64")]
+                            {
+                                if opt != 0 {
+                                    let v = {
+                                        let v = [reg("x2"), reg("x3")];
+                                        &values_to_bytes::<16, _>(v.into_iter(), 2)?
+                                    };
+                                    Some(rwriter.prim_v(left.primitive_name(), v))
+                                } else {
+                                    None
+                                }
+                            }
+                        };
+                        event.write_option(rwriter, RETVAL, return_type.name(), val);
                     } else if opt != 0 {
                         let val = if left_size == 0 {
                             rwriter.unit_v()
-                        } else if matches!(left, ValueType::i128 | ValueType::u128) {
-                            let v = {
-                                #[cfg(target_arch = "x86_64")]
-                                {
-                                    // we are using rcx too
-                                    &values_to_bytes::<16, _>([rdx(), rcx()].into_iter(), 2)?
-                                }
-                                #[cfg(target_arch = "aarch64")]
-                                {
-                                    let v = [reg("x2"), reg("x3")];
-                                    &values_to_bytes::<16, _>(v.into_iter(), 2)?
-                                }
-                            };
-                            rwriter.prim_v(left.primitive_name(), v)
                         } else if matches!(left, ValueType::Slice(_)) {
                             get_slice_from_rax_rdx(rwriter, &left, &left_type)?
                         } else if left.is_thin_ptr() {
@@ -793,17 +817,27 @@ pub(super) fn write_return_value(
                     {
                         // Result<i128, i128>, Result<u128, u128>, Result<i128, ()>, Result<(), u128>
                         log::trace!("{} rcx, rdx", return_type.name());
-                        let res = read_u64(&rax())?;
-                        let v = {
+                        let (res, v) = {
                             #[cfg(target_arch = "x86_64")]
                             {
-                                // we are using rcx too
-                                &values_to_bytes::<16, _>([rdx(), rcx()].into_iter(), 2)?
+                                let rdx_u64 = read_u64(&rdx())?;
+                                let rcx_u64 = read_u64(&rcx())?;
+                                let res_is_rcx = (rdx_u64 == 0 && rcx_u64 == 1)
+                                    || (rdx_u64 == 0 && rcx_u64 == 0);
+                                let has_unit = left_size == 0 || right_size == 0;
+                                let res = if res_is_rcx { rcx_u64 } else { rdx_u64 };
+                                let v = if res_is_rcx {
+                                    [reg("rsi"), reg("r8")]
+                                } else {
+                                    [reg("rdi"), reg("r8")]
+                                };
+                                (res, &values_to_bytes::<16, _>(v.into_iter(), 2)?)
                             }
                             #[cfg(target_arch = "aarch64")]
                             {
+                                let res = read_u64(&rax())?;
                                 let v = [reg("x2"), reg("x3")];
-                                &values_to_bytes::<16, _>(v.into_iter(), 2)?
+                                (res, &values_to_bytes::<16, _>(v.into_iter(), 2)?)
                             }
                         };
                         let val = if left_size == 0 && res == 0 {

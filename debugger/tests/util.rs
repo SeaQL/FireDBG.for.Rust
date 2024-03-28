@@ -14,6 +14,7 @@ use std::{
     fs::{File, OpenOptions},
     io::Write,
     path::Path,
+    time::SystemTime,
 };
 
 #[derive(Debug)]
@@ -46,6 +47,31 @@ pub fn debugger_params_from_file(testcase: &str) -> DebuggerParams {
 
     DebuggerParams {
         binary: format!("testcases/{testcase}.o"),
+        files,
+        breakpoints,
+        arguments: vec![],
+    }
+}
+
+pub fn debugger_params_testbench(testcase: &str) -> DebuggerParams {
+    let path = format!("../testbench/{testcase}/src/bin/main.rs");
+    let mut files = vec![Default::default()];
+    files.push(SourceFile {
+        id: 1,
+        path: path.clone(),
+        crate_name: testcase.into(),
+        modified: SystemTime::UNIX_EPOCH,
+    });
+
+    let mut breakpoints = vec![Default::default()];
+    for func in firedbg_rust_parser::parse_file(&path).unwrap() {
+        breakpoints.push(new_breakpoint(breakpoints.len() as u32, 1, func));
+    }
+
+    // TODO cargo b --bin main
+
+    DebuggerParams {
+        binary: format!("../testbench/{testcase}/target/debug/main"),
         files,
         breakpoints,
         arguments: vec![],

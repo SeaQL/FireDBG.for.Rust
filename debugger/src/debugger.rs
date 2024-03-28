@@ -722,7 +722,9 @@ fn run(mut params: DebuggerParams, mut producer: SeaProducer) -> Result<()> {
                         })
                         .iter()
                     {
-                        write_variable(var);
+                        if var.name().is_some() {
+                            write_variable(var);
+                        }
                     }
                 }
                 VariableCapture::Only(vars) => {
