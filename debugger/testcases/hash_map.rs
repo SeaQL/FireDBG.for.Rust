@@ -97,4 +97,13 @@ fn main() {
     hash_map_it(map);
     let map: HashSet<i32> = (1..=1000).collect();
     hash_set_it(map);
+    let map: HashMap<String, Vec<(String, i32)>> = [
+        ("aa".into(), vec![("aaaa".into(), 1)]),
+        ("bb".into(), vec![("bbbb".into(), 2)]),
+        ("cc".into(), vec![("cccc".into(), 3)]),
+        ("dd".into(), vec![("dddd".into(), 4)]),
+    ]
+    .into_iter()
+    .collect();
+    hash_map_it(map);
 }
