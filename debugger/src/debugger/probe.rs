@@ -67,7 +67,8 @@ fn execute_rust_program(obj: &str) -> anyhow::Result<String> {
 
 fn probe_layout_of(typedef: &str) -> anyhow::Result<Layout> {
     log::trace!("Probing {typedef} ...");
-    let mut src = format!("{}", typedef);
+    let mut src = "extern crate alloc;\n".to_string();
+    write!(src, "{}", typedef)?;
     write!(
         src,
         r#"

@@ -156,6 +156,14 @@ async fn main() -> Result<()> {
                     },
                     _ => panic!("Unexpected RValue"),
                 },
+                27 => {
+                    let pretty = format!("{}", &arguments[0].1);
+                    println!("{pretty}");
+                    assert_eq!(
+                        pretty,
+                        r#"[(String::from("aa"), vec![(String::from("aaaa"), 1i32)]), (String::from("bb"), vec![(String::from("bbbb"), 2i32)]), (String::from("cc"), vec![(String::from("cccc"), 3i32)]), (String::from("dd"), vec![(String::from("dddd"), 4i32)])].into_iter().collect::<std::collections::hash::map::HashMap<alloc::string::String, alloc::vec::Vec<(alloc::string::String, i32)>>>()"#
+                    )
+                }
                 _ => panic!("Unexpected {i}"),
             },
             _ => (),
