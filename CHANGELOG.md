@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.77.1 - 2024-04-19
+
+### Bug Fixes
+
+- debugger: fix memory layout probing https://github.com/SeaQL/FireDBG.for.Rust/pull/41
+
 ## 1.77.0 - 2024-03-28
 
 ### Versions
