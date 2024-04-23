@@ -5,6 +5,9 @@ use strum::{Display, EnumString};
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 /// Allocation
 pub struct Allocation {
+    // TODO
+    // thread_id
+    // frame_id
     pub action: AllocAction,
     pub address: u64,
     pub type_name: String,

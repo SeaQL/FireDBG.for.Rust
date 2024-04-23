@@ -34,6 +34,7 @@ lazy_static::lazy_static! {
     pub static ref KEEP_HASH_ORDER: bool = config_bool("KEEP_HASH_ORDER");
     /// If set, don't trace heap allocations.
     pub static ref DONT_TRACE_ALLOCATION: bool = config_bool("DONT_TRACE_ALLOCATION");
+    static ref SAMPLE: Option<String> = config_string("SAMPLE");
 }
 
 #[doc(hidden)]
@@ -43,17 +44,24 @@ pub fn load_config() -> usize {
 }
 
 fn config_usize(key: &str) -> Option<usize> {
-    match CONFIG.get(key).cloned() {
-        Some(ConfigValue::u64(v)) => Some(v as usize),
+    match CONFIG.get(key) {
+        Some(ConfigValue::u64(v)) => Some(*v as usize),
         _ => None,
     }
 }
 
 /// Unset is false
 fn config_bool(key: &str) -> bool {
-    match CONFIG.get(key).cloned() {
-        Some(ConfigValue::bool(v)) => v,
+    match CONFIG.get(key) {
+        Some(ConfigValue::bool(v)) => *v,
         _ => false,
+    }
+}
+
+fn config_string(key: &str) -> Option<String> {
+    match CONFIG.get(key).cloned() {
+        Some(ConfigValue::String(v)) => Some(v),
+        _ => None,
     }
 }
 

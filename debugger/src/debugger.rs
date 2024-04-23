@@ -362,7 +362,9 @@ fn run(mut params: DebuggerParams, mut producer: SeaProducer) -> Result<()> {
         let mut return_immediately = false;
         if matches!(
             bp_event_type,
-            BreakpointType::Breakpoint | BreakpointType::FunctionCall { .. }
+            BreakpointType::Breakpoint
+                | BreakpointType::FunctionCall { .. }
+                | BreakpointType::FutureEndpoint
         ) {
             let mut event = if matches!(bp_event_type, BreakpointType::Breakpoint) {
                 let (active_frame_id, reason) = active_frames
@@ -519,6 +521,25 @@ fn run(mut params: DebuggerParams, mut producer: SeaProducer) -> Result<()> {
                 }
 
                 EventStream::function_call(bp_id, thread_id, active_frames.last().expect("Pushed"))
+            } else if matches!(bp_event_type, BreakpointType::FutureEndpoint) {
+                let sb_function = sb_frame.function();
+                let fn_name = sb_function.name();
+                let (active_frame_id, reason) = active_frames
+                    .last()
+                    .map(|active_frame| {
+                        (
+                            active_frame.frame_id,
+                            if fn_name.ends_with("::{{closure}}") {
+                                Reason::FutureExit
+                            } else {
+                                Reason::FutureEnter
+                            },
+                        )
+                    })
+                    .unwrap_or_default();
+                let mut event = EventStream::breakpoint(bp_id, thread_id, active_frame_id, reason);
+                event.write_string(rwriter, "fn", &fn_name.replace("::{{closure}}", ""));
+                event
             } else {
                 unreachable!();
             };
@@ -1104,6 +1125,14 @@ impl Bytes {
         };
         self.write_value(rwriter, name, bytes.as_bytes());
     }
+
+    fn write_string(&mut self, rwriter: &mut RValueWriter, name: &str, value: &str) {
+        self.identifier(name);
+        self.push_str("name");
+        self.space();
+        self.push_bytes(rwriter.strlit_v(value.as_bytes()));
+        self.space();
+    }
 }
 
 impl Default for Thread {
@@ -1117,7 +1146,7 @@ impl Default for Thread {
 }
 
 #[doc(hidden)]
-pub fn new_breakpoint(id: u32, file_id: u32, func: FunctionDef) -> Breakpoint {
+pub fn new_breakpoint(id: u32, file_id: u32, func: &FunctionDef) -> Breakpoint {
     Breakpoint {
         id,
         file_id,
@@ -1127,6 +1156,18 @@ pub fn new_breakpoint(id: u32, file_id: u32, func: FunctionDef) -> Breakpoint {
             fn_name: func.ty.fn_name().into(),
         },
         capture: VariableCapture::Arguments,
+    }
+}
+
+#[doc(hidden)]
+pub fn new_async_breakpoint(id: u32, file_id: u32, func: &FunctionDef) -> Breakpoint {
+    Breakpoint {
+        id,
+        file_id,
+        loc: func.end,
+        loc_end: None,
+        breakpoint_type: BreakpointType::FutureEndpoint,
+        capture: VariableCapture::None,
     }
 }
 

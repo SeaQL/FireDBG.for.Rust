@@ -113,12 +113,22 @@ impl FunctionType {
     }
 
     pub fn fn_name(&self) -> &str {
-        match self {
-            FunctionType::FreeFn { fn_name, .. } => &fn_name,
-            FunctionType::ImplFn { fn_name, .. } => &fn_name,
-            FunctionType::ImplTraitFn { fn_name, .. } => &fn_name,
-            FunctionType::TraitDefaultFn { fn_name, .. } => &fn_name,
-            FunctionType::NestedFn { fn_name, .. } => &fn_name,
+        match &self {
+            FunctionType::FreeFn { fn_name, .. } => fn_name,
+            FunctionType::ImplFn { fn_name, .. } => fn_name,
+            FunctionType::ImplTraitFn { fn_name, .. } => fn_name,
+            FunctionType::TraitDefaultFn { fn_name, .. } => fn_name,
+            FunctionType::NestedFn { fn_name, .. } => fn_name,
+        }
+    }
+
+    pub fn is_async(&self) -> bool {
+        match *self {
+            FunctionType::FreeFn { is_async, .. } => is_async,
+            FunctionType::ImplFn { is_async, .. } => is_async,
+            FunctionType::ImplTraitFn { is_async, .. } => is_async,
+            FunctionType::TraitDefaultFn { is_async, .. } => is_async,
+            FunctionType::NestedFn { is_async, .. } => is_async,
         }
     }
 }

@@ -144,7 +144,7 @@ async fn main() -> Result<()> {
             modified,
         });
         for func in functions {
-            breakpoints.push(new_breakpoint(breakpoints.len() as u32, id, func));
+            breakpoints.push(new_breakpoint(breakpoints.len() as u32, id, &func));
         }
         id += 1;
     };

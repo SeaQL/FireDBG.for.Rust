@@ -24,6 +24,7 @@ pub enum BreakpointType {
         fn_name: String,
     },
     FunctionReturn,
+    FutureEndpoint,
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -46,6 +47,7 @@ impl BreakpointType {
             Self::Breakpoint => "Breakpoint",
             Self::FunctionCall { .. } => "FunctionCall",
             Self::FunctionReturn => "FunctionReturn",
+            Self::FutureEndpoint => "FutureEndpoint",
         }
     }
 }

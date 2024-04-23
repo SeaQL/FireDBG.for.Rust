@@ -23,12 +23,22 @@ impl EventStream {
         assert!(source.len() > 0);
         let event = match source.get(0) {
             b'B' => {
-                let reason = match source.get(1) {
+                let mut i = 1;
+                let reason = match source.get(i) {
                     b'B' => crate::Reason::Breakpoint,
                     b'P' => crate::Reason::Panic,
+                    b'F' => {
+                        i += 1;
+                        match source.get(i) {
+                            b'{' => crate::Reason::FutureEnter,
+                            b'}' => crate::Reason::FutureExit,
+                            other => panic!("Unknown reason, got {other:?}"),
+                        }
+                    }
                     other => panic!("Unknown reason, got {other:?}"),
                 };
-                reader.set_source(source, 2);
+                i += 1;
+                reader.set_source(source, i);
                 let breakpoint_id = reader.read_int().unwrap() as u32;
                 let thread_id = reader.read_int().unwrap();
                 let frame_id = reader.read_int().unwrap();
@@ -94,7 +104,14 @@ impl EventStream {
         bytes.push_byte(match reason {
             crate::Reason::Breakpoint => b'B',
             crate::Reason::Panic => b'P',
+            crate::Reason::FutureEnter => b'F',
+            crate::Reason::FutureExit => b'F',
         });
+        match reason {
+            crate::Reason::FutureEnter => bytes.push_byte(b'{'),
+            crate::Reason::FutureExit => bytes.push_byte(b'}'),
+            _ => (),
+        }
         bytes.integer(bp_id.0);
         bytes.integer(thread_id);
         bytes.integer(frame_id);

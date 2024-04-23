@@ -35,6 +35,8 @@ pub enum Reason {
     #[default]
     Breakpoint,
     Panic,
+    FutureEnter,
+    FutureExit,
 }
 
 impl Event {

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.78.0 - Pending
+
+### Versions
+
++ `1.78.0-beta.1`: 2024-04-23
+
 ## 1.77.1 - 2024-04-19
 
 ### Bug Fixes

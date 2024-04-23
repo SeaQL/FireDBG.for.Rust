@@ -106,6 +106,8 @@ pub fn event(timestamp: Timestamp, event: SrcEvent) -> Event {
             write!(pretty, ")").unwrap();
             let event_type = match reason {
                 Reason::Breakpoint => EventType::Breakpoint,
+                Reason::FutureEnter => EventType::FutureEnter,
+                Reason::FutureExit => EventType::FutureExit,
                 Reason::Panic => {
                     is_error = true;
                     EventType::Panic

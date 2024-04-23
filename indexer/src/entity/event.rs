@@ -57,6 +57,10 @@ pub enum EventType {
     FunctionCall,
     #[sea_orm(string_value = "R")]
     FunctionReturn,
+    #[sea_orm(string_value = "AF")]
+    FutureEnter,
+    #[sea_orm(string_value = "AR")]
+    FutureExit,
 }
 
 impl Serialize for EventType {

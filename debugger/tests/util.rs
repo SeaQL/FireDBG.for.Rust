@@ -2,8 +2,8 @@
 #![allow(unused_imports)]
 
 use firedbg_rust_debugger::{
-    new_breakpoint, DebuggerInfo, DebuggerParams, Event, FireDbgForRust, InfoMessage, SourceFile,
-    ALLOCATION_STREAM, EVENT_STREAM, INFO_STREAM,
+    new_async_breakpoint, new_breakpoint, DebuggerInfo, DebuggerParams, Event, FireDbgForRust,
+    InfoMessage, SourceFile, ALLOCATION_STREAM, EVENT_STREAM, INFO_STREAM,
 };
 use pretty_assertions::assert_eq;
 use sea_streamer::{
@@ -40,7 +40,7 @@ pub fn debugger_params_from_file(testcase: &str) -> DebuggerParams {
 
     let mut breakpoints = vec![Default::default()];
     for func in firedbg_rust_parser::parse_file(&path).unwrap() {
-        breakpoints.push(new_breakpoint(breakpoints.len() as u32, 1, func));
+        breakpoints.push(new_breakpoint(breakpoints.len() as u32, 1, &func));
     }
 
     rustc(&format!("testcases/{testcase}"));
@@ -65,10 +65,13 @@ pub fn debugger_params_testbench(testcase: &str) -> DebuggerParams {
 
     let mut breakpoints = vec![Default::default()];
     for func in firedbg_rust_parser::parse_file(&path).unwrap() {
-        breakpoints.push(new_breakpoint(breakpoints.len() as u32, 1, func));
+        breakpoints.push(new_breakpoint(breakpoints.len() as u32, 1, &func));
+        if func.ty.is_async() {
+            breakpoints.push(new_async_breakpoint(breakpoints.len() as u32, 1, &func));
+        }
     }
 
-    // TODO cargo b --bin main
+    cargo_b(&format!("../testbench/{testcase}/Cargo.toml"), "main");
 
     DebuggerParams {
         binary: format!("../testbench/{testcase}/target/debug/main"),
@@ -239,4 +242,17 @@ fn rustc_cmd(src: &str, obj: &str) -> std::process::Command {
         .arg("-o")
         .arg(&obj);
     cmd
+}
+
+fn cargo_b(toml: &str, bin: &str) {
+    let mut cmd = std::process::Command::new("cargo");
+    cmd.arg("b")
+        .arg("--manifest-path")
+        .arg(toml)
+        .arg("--bin")
+        .arg(bin);
+    let result = cmd.spawn().unwrap().wait_with_output().unwrap();
+    if result.status.code().unwrap() != 0 {
+        panic!("Failed to build {toml}");
+    }
 }

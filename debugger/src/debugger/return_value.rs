@@ -607,7 +607,7 @@ pub(super) fn write_return_value(
                                 let rcx_u64 = read_u64(&rcx())?;
                                 let res_is_rcx = (rdx_u64 == 0 && rcx_u64 == 1)
                                     || (rdx_u64 == 0 && rcx_u64 == 0);
-                                if res_is_rcx && (read_u64(&rdx())? & 0xF) != 0 {
+                                if res_is_rcx && (read_u64(&rcx())? & 0xF) != 0 {
                                     let v = {
                                         let v = [reg("rsi"), reg("r8")];
                                         &values_to_bytes::<16, _>(v.into_iter(), 2)?
@@ -824,7 +824,6 @@ pub(super) fn write_return_value(
                                 let rcx_u64 = read_u64(&rcx())?;
                                 let res_is_rcx = (rdx_u64 == 0 && rcx_u64 == 1)
                                     || (rdx_u64 == 0 && rcx_u64 == 0);
-                                let has_unit = left_size == 0 || right_size == 0;
                                 let res = if res_is_rcx { rcx_u64 } else { rdx_u64 };
                                 let v = if res_is_rcx {
                                     [reg("rsi"), reg("r8")]
@@ -898,6 +897,38 @@ pub(super) fn write_return_value(
                             val,
                         );
                         return Ok(());
+                    } else if cfg!(target_arch = "aarch64")
+                        && (left_size <= 8 && right_size <= 8)
+                        && (left.is_integer() && right.is_integer())
+                        && left.is_signed_integer() != right.is_signed_integer()
+                    {
+                        // since llvm 18; Result<u32, i32> Result<u64, i64>
+                        log::trace!("{} x0, x1", return_type.name());
+                        let res = read_u64(&reg("x0"))?;
+                        let left_or_right = if res == 0 { &left } else { &right };
+                        let val = get_prim_from_rdx(rwriter, left_or_right)?;
+                        event.write_result(rwriter, RETVAL, return_type.name(), res == 0, val);
+                        return Ok(());
+                    } else if cfg!(target_arch = "aarch64")
+                        && matches!(
+                            (&left, &right),
+                            (ValueType::u128, ValueType::i128) | (ValueType::i128, ValueType::u128)
+                        )
+                    {
+                        // since llvm 18; Result<u128, i128>
+                        log::trace!("{} x0, x2, x3", return_type.name());
+                        let res = read_u64(&reg("x0"))?;
+                        let left_or_right = if res == 0 { &left } else { &right };
+                        let val = rwriter.prim_v(
+                            match left_or_right {
+                                ValueType::u128 => "u128",
+                                ValueType::i128 => "i128",
+                                _ => unreachable!(),
+                            },
+                            &values_to_bytes::<16, _>([reg("x2"), reg("x3")].into_iter(), 2)?,
+                        );
+                        event.write_result(rwriter, RETVAL, return_type.name(), res == 0, val);
+                        return Ok(());
                     } else if (left_size <= 8 && right_size <= 8) // must fit in register
                         && (left == right // same type, easy case
                         || (left.is_thin_ptr() && right.is_thin_ptr()) // both are pointers
@@ -919,18 +950,22 @@ pub(super) fn write_return_value(
                             // this is the complex case, where the discriminant and value are both squashed into the same register
                             let data = read_u64(&rax())?;
                             let res = data & 0x1; // select the least significant bit
-                            let b = data.to_ne_bytes();
-                            // print!("bytes = "); for b in b.iter() { print!("{b:02X}"); } log::trace!();
                             let left_or_right = if res == 0 { &left } else { &right };
                             let left_or_right_size = if res == 0 { left_size } else { right_size };
                             let ty = left_or_right.primitive_name();
 
-                            let val = match left_or_right_size {
-                                // the value is in the 2nd lower word
-                                1 => rwriter.prim_v(ty, &b[1..2]),
-                                2 => rwriter.prim_v(ty, &b[2..4]),
-                                4 => rwriter.prim_v(ty, &b[4..8]),
-                                _ => unreachable!(),
+                            let val = if data == 0 || data == 1 {
+                                let b = read_u64(&rdx())?.to_ne_bytes();
+                                rwriter.prim_v(ty, &b[..left_or_right_size])
+                            } else {
+                                let b = data.to_ne_bytes();
+                                match left_or_right_size {
+                                    // the value is in the 2nd lower word
+                                    1 => rwriter.prim_v(ty, &b[1..2]),
+                                    2 => rwriter.prim_v(ty, &b[2..4]),
+                                    4 => rwriter.prim_v(ty, &b[4..8]),
+                                    _ => unreachable!(),
+                                }
                             };
                             event.write_result(rwriter, RETVAL, return_type.name(), res == 0, val);
                         } else if (left == ValueType::Unit || right == ValueType::Unit)
@@ -993,9 +1028,29 @@ pub(super) fn write_return_value(
             // Result<i32, i64>, Result<u64, i64>
             #[cfg(target_arch = "x86_64")]
             {
-                log::trace!("{} pass by stack (rax)", return_type.name());
-                let sb_value = sb_value_from_rax(return_type)?;
-                event.write_sb_value(rwriter, &sb_value);
+                let data = read_u64(&rax())?;
+                if data == 0 || data == 1 {
+                    let res = data & 0x1; // select the least significant bit
+                    let left_or_right = if res == 0 { &left } else { &right };
+                    let left_or_right_size = match (left.size_of(), right.size_of()) {
+                        (SizeOfType::Sized(left_size), SizeOfType::Sized(right_size)) => {
+                            if res == 0 {
+                                left_size
+                            } else {
+                                right_size
+                            }
+                        }
+                        _ => unreachable!(),
+                    };
+                    let ty = left_or_right.primitive_name();
+                    let b = read_u64(&rdx())?.to_ne_bytes();
+                    let val = rwriter.prim_v(ty, &b[..left_or_right_size]);
+                    event.write_result(rwriter, RETVAL, return_type.name(), res == 0, val);
+                } else {
+                    log::trace!("{} pass by stack (rax)", return_type.name());
+                    let sb_value = sb_value_from_rax(return_type)?;
+                    event.write_sb_value(rwriter, &sb_value);
+                }
             }
             #[cfg(target_arch = "aarch64")]
             {

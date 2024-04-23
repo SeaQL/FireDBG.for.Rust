@@ -15,7 +15,7 @@ pub struct SourceFile {
     // pub hash: String,
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 /// Line number of column of a symbol.
 pub struct LineColumn {
     pub line: u32,

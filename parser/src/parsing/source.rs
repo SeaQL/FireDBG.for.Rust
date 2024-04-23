@@ -10,7 +10,11 @@ pub(crate) fn parse_body_loc(block: &syn::Block) -> BreakableSpan {
 }
 
 pub(crate) fn parse_body_end(block: &syn::Block) -> LineColumn {
-    block.span().end().into_loc()
+    let end = block.span().end().into_loc();
+    LineColumn {
+        line: end.line,
+        column: end.column.map(|s| s - 1),
+    }
 }
 
 /// Parse the line and column number of function block.

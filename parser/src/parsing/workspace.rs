@@ -18,8 +18,6 @@ fn parse_packages(raw_packages: Vec<raw::Package>, workspace_root_dir: &str) -> 
     raw_packages
         .into_iter()
         .filter(|raw_package| {
-            let name = &raw_package.name;
-            let version = &raw_package.version;
             let package_id = &raw_package.id;
             // Is local package
             if package_id.starts_with("path+file://") {

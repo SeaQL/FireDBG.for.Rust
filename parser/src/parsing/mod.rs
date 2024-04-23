@@ -1,4 +1,6 @@
+#[allow(dead_code)]
 mod body;
+
 mod function;
 mod source;
 mod workspace;

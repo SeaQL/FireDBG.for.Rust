@@ -111,7 +111,7 @@ async fn main() -> Result<()> {
                 } else if i == 137 {
                     assert!(matches!(return_value, RValue::Unit));
                 } else {
-                    panic!("{json}");
+                    panic!("{function_name}() {json}");
                 }
             }
             _ => (),
