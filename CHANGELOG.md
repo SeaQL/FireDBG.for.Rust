@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.79.0 - Pending
+
+### Versions
+
++ `1.79.0-beta.1`: 2024-05-30
+
 ## 1.78.0 - 2024-05-02
 
 ### Versions
