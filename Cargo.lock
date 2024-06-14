@@ -709,7 +709,7 @@ checksum = "8fcfdc7a0362c9f4444381a9e697c79d435fe65b52a37466fc2c1184cee9edc6"
 
 [[package]]
 name = "firedbg-cli"
-version = "1.78.0"
+version = "1.79.0"
 dependencies = [
  "anstyle",
  "anyhow",
@@ -741,7 +741,7 @@ dependencies = [
 
 [[package]]
 name = "firedbg-rust-debugger"
-version = "1.78.0"
+version = "1.79.0"
 dependencies = [
  "anyhow",
  "dotenvy",
@@ -782,7 +782,7 @@ dependencies = [
 
 [[package]]
 name = "firedbg-stream-indexer"
-version = "1.78.0"
+version = "1.79.0"
 dependencies = [
  "anyhow",
  "async-trait",
