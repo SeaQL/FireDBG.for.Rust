@@ -142,6 +142,23 @@ get_architecture() {
                     local _ostype="ubuntu$_os_version_id"
                     ;;
             esac
+            local _os_id_like="$(awk -F= '$1=="ID_LIKE" { print $2 ;}' /etc/os-release | tr -d '"')"
+            case "$_os_id" in
+                linuxmint*)
+                    case "$_os_like" in
+                        ubuntu*)
+                        case "$_os_version_id" in
+                            21*)
+                                local _ostype="ubuntu22"
+                                ;;
+                            20*)
+                                local _ostype="ubuntu20"
+                                ;;
+                        debian*)
+                            local _ostype="debian12"
+                            ;;
+                    esac
+            esac                    
             case "$_ostype" in
                 ubuntu22*)
                     check_apt_install libc++abi1-15
