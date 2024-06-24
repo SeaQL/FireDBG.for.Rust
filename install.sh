@@ -160,7 +160,7 @@ get_architecture() {
                             local _ostype="debian12"
                             ;;
                     esac
-            esac                    
+            esac
             case "$_ostype" in
                 ubuntu22*)
                     check_apt_install libc++abi1-15
