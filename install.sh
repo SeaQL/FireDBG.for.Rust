@@ -156,7 +156,7 @@ get_architecture() {
                                     ;;
                             esac
                             ;;
-                        debian*)
+                        debian*) # Debian Bookworm
                             local _ostype="debian12"
                             ;;
                     esac
