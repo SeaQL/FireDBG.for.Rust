@@ -145,7 +145,7 @@ get_architecture() {
             local _os_id_like="$(awk -F= '$1=="ID_LIKE" { print $2 ;}' /etc/os-release | tr -d '"')"
             case "$_os_id" in
                 linuxmint*)
-                    case "$_os_like" in
+                    case "$_os_id_like" in
                         ubuntu*)
                         case "$_os_version_id" in
                             21*)
