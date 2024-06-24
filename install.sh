@@ -149,10 +149,10 @@ get_architecture() {
                         ubuntu*)
                             case "$_os_version_id" in
                                 21*) # Ubuntu Jammy
-                                    local _ostype="ubuntu22"
+                                    local _ostype="ubuntu22.04"
                                     ;;
                                 20*) # Ubuntu Focal
-                                    local _ostype="ubuntu20"
+                                    local _ostype="ubuntu20.04"
                                     ;;
                             esac
                             ;;
