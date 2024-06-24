@@ -147,13 +147,15 @@ get_architecture() {
                 linuxmint*)
                     case "$_os_id_like" in
                         ubuntu*)
-                        case "$_os_version_id" in
-                            21*)
-                                local _ostype="ubuntu22"
-                                ;;
-                            20*)
-                                local _ostype="ubuntu20"
-                                ;;
+                            case "$_os_version_id" in
+                                21*) # Ubuntu Jammy
+                                    local _ostype="ubuntu22"
+                                    ;;
+                                20*) # Ubuntu Focal
+                                    local _ostype="ubuntu20"
+                                    ;;
+                            esac
+                            ;;
                         debian*)
                             local _ostype="debian12"
                             ;;
