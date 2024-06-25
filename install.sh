@@ -177,6 +177,9 @@ get_architecture() {
                 fedora39*)
                     check_dnf_install libcxxabi
                     ;;
+                fedora40*)
+                    check_dnf_install libcxxabi
+                    ;;
                 centos9*)
                     check_yum_install_rpm libcxxabi https://kojipkgs.fedoraproject.org//packages/libcxx/17.0.4/1.fc39/x86_64/libcxxabi-17.0.4-1.fc39.x86_64.rpm
                     ;;
