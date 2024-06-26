@@ -1,0 +1,29 @@
+# 1. Build the Docker image
+#    ```
+#    docker build --no-cache -t firedbg-fedora40 -f build/Dockerfile.fedora40 .
+#    # Or, keeping the full build log
+#    docker build --no-cache --progress plain -t firedbg-fedora40 -f build/Dockerfile.fedora40 .
+#    ```
+# 2. Start a Docker container and mount the directories to the container
+#    ```
+#    docker run --name firedbg-fedora40 --rm -it -v $(pwd):/FireDBG.for.Rust firedbg-fedora40
+#    ```
+# 3. Buuld release
+#    ```
+#    cd /FireDBG.for.Rust && sh build-tools/release-x86_64-fedora.sh
+#    ```
+
+FROM fedora:40
+
+# The following dependencies are required
+RUN dnf upgrade -y --refresh
+# Needed in `release.sh`
+RUN dnf install -y curl unzip
+# Needed to build FireDBG executables and run self tests
+RUN dnf groupinstall -y "Development Tools" "Development Libraries"
+RUN dnf install -y clang pkgconf-pkg-config openssl-devel
+RUN dnf install -y lldb-devel python3-lldb libcxx-devel libcxxabi
+
+# Install Rust
+RUN curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y
+ENV PATH "/root/.cargo/bin:$PATH"

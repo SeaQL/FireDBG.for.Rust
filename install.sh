@@ -174,11 +174,9 @@ get_architecture() {
                 debian10*)
                     check_apt_install libc++abi1-7
                     ;;
-                fedora39*)
+                fedora39* | fedora40* | fedora41*)
                     check_dnf_install libcxxabi
-                    ;;
-                fedora40*)
-                    check_dnf_install libcxxabi
+                    local _ostype="fedora39"
                     ;;
                 centos9*)
                     check_yum_install_rpm libcxxabi https://kojipkgs.fedoraproject.org//packages/libcxx/17.0.4/1.fc39/x86_64/libcxxabi-17.0.4-1.fc39.x86_64.rpm
