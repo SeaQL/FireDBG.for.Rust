@@ -174,6 +174,10 @@ get_architecture() {
                 debian10*)
                     check_apt_install libc++abi1-7
                     ;;
+                debian*)
+                    check_apt_install libc++abi1-16
+                    local _ostype="debian12"
+                    ;;
                 fedora39* | fedora40* | fedora41*)
                     check_dnf_install libcxxabi
                     local _ostype="fedora39"
