@@ -696,7 +696,7 @@ dependencies = [
 
 [[package]]
 name = "firedbg-cli"
-version = "1.79.0"
+version = "1.80.0-beta.1"
 dependencies = [
  "anstyle",
  "anyhow",
@@ -728,7 +728,7 @@ dependencies = [
 
 [[package]]
 name = "firedbg-rust-debugger"
-version = "1.79.0"
+version = "1.80.0-beta.1"
 dependencies = [
  "anyhow",
  "dotenvy",
@@ -769,7 +769,7 @@ dependencies = [
 
 [[package]]
 name = "firedbg-stream-indexer"
-version = "1.79.0"
+version = "1.80.0-beta.1"
 dependencies = [
  "anyhow",
  "async-trait",
