@@ -1160,7 +1160,24 @@ pub(super) fn write_return_value(
                     {
                         if left_type.is_float() && right_type.is_float() && left_type != right_type
                         {
-                            // a pair of (f32, f64) will not be passed by register
+                            let (left_value, right_value) = if left_size >= right_size {
+                                (
+                                    get_float_from_xmm0(rwriter, &left_type)?,
+                                    get_float_from_xmm1(rwriter, &right_type)?,
+                                )
+                            } else {
+                                (
+                                    get_float_from_xmm1(rwriter, &left_type)?,
+                                    get_float_from_xmm0(rwriter, &right_type)?,
+                                )
+                            };
+
+                            let value = rwriter.struct_v(
+                                return_type.name(),
+                                [(left_name, left_value), (right_name, right_value)].into_iter(),
+                            );
+                            event.write_value(rwriter, RETVAL, value.as_bytes());
+                            return Ok(());
                         } else {
                             log::trace!("{} rax, rdx", return_type.name());
                             let left_value = if left_type.is_primitive() {

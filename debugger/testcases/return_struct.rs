@@ -11,7 +11,13 @@ struct Vector {
     y: f64,
 }
 #[derive(Debug)]
-struct Coeff(f32, f64);
+struct Coeff36(f32, f64);
+#[derive(Debug)]
+struct Coeff63(f64, f32);
+#[derive(Debug)]
+struct Coeff32(f32, f32);
+#[derive(Debug)]
+struct Coeff64(f64, f64);
 #[derive(Debug)]
 struct Mixed {
     x: i32,
@@ -40,10 +46,13 @@ fn ret_2() -> (Point, i32) { bb((Point { x: 1, y: 2 }, 3)) }
 fn ret_3() -> Vector { bb(Vector { x: 1.1, y: 2.1 }) }
 fn ret_4() -> Mixed { bb(Mixed { x: 4, y: 0.1 }) }
 fn ret_5() -> Wrapper<Point> { bb(Wrapper{ i: Point { x: 3, y: 4 } }) }
-fn ret_6() -> Coeff { bb(Coeff(1.1, 2.2)) }
-fn ret_7() -> MapPoint { bb(MapPoint { u: Anchor(-22), v: Anchor(44) }) }
-fn ret_8() -> Label { bb(Label { s: "hello" }) }
-fn ret_9() -> Long { bb(Long(22_222_222_222_222_222_222)) }
+fn ret_6() -> Coeff36 { bb(Coeff36(1.1, 2.2)) }
+fn ret_7() -> Coeff63 { bb(Coeff63(64.1, 32.2)) }
+fn ret_8() -> Coeff32 { bb(Coeff32(32.1, 32.2)) }
+fn ret_9() -> Coeff64 { bb(Coeff64(64.1, 64.2)) }
+fn ret_10() -> MapPoint { bb(MapPoint { u: Anchor(-22), v: Anchor(44) }) }
+fn ret_11() -> Label { bb(Label { s: "hello" }) }
+fn ret_12() -> Long { bb(Long(22_222_222_222_222_222_222)) }
 
 fn main() {
     let r = ret_1(); dbg!(r);
@@ -55,5 +64,8 @@ fn main() {
     let r = ret_7(); dbg!(r);
     let r = ret_8(); dbg!(r);
     let r = ret_9(); dbg!(r);
+    let r = ret_10(); dbg!(r);
+    let r = ret_11(); dbg!(r);
+    let r = ret_12(); dbg!(r);
     println!();
 }

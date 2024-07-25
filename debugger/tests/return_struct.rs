@@ -18,7 +18,7 @@ async fn main() -> Result<()> {
 
     producer.end().await?;
 
-    for i in 0..20 {
+    for i in 0..26 {
         let payload = consumer.next().await?.message().into_bytes();
         let event = EventStream::read_from(Bytes::from(payload));
         // println!("#{i} {:?}", event);
@@ -44,14 +44,20 @@ async fn main() -> Result<()> {
                         10 =>
                             r#"{"type":"Struct","typename":"return_struct::Wrapper<return_struct::Point>","fields":{"x":{"type":"Prim","typename":"i32","value":3},"y":{"type":"Prim","typename":"i32","value":4}}}"#,
                         12 =>
-                            r#"{"type":"Struct","typename":"return_struct::Coeff","fields":{"0":{"type":"Prim","typename":"f32","value":1.1},"1":{"type":"Prim","typename":"f64","value":2.2}}}"#,
+                            r#"{"type":"Struct","typename":"return_struct::Coeff36","fields":{"0":{"type":"Prim","typename":"f32","value":1.1},"1":{"type":"Prim","typename":"f64","value":2.2}}}"#,
                         14 =>
-                            r#"{"type":"Struct","typename":"return_struct::MapPoint","fields":{"u":{"type":"Prim","typename":"i64","value":"-22"},"v":{"type":"Prim","typename":"i64","value":"44"}}}"#,
+                            r#"{"type":"Struct","typename":"return_struct::Coeff63","fields":{"0":{"type":"Prim","typename":"f64","value":64.1},"1":{"type":"Prim","typename":"f32","value":32.2}}}"#,
                         16 =>
-                            r#"{"type":"Struct","typename":"return_struct::Label","fields":{"s":{"type":"String","typename":"&str","value":"hello"}}}"#,
+                            r#"{"type":"Struct","typename":"return_struct::Coeff32","fields":{"0":{"type":"Prim","typename":"f32","value":32.1},"1":{"type":"Prim","typename":"f32","value":32.2}}}"#,
                         18 =>
+                            r#"{"type":"Struct","typename":"return_struct::Coeff64","fields":{"0":{"type":"Prim","typename":"f64","value":64.1},"1":{"type":"Prim","typename":"f64","value":64.2}}}"#,
+                        20 =>
+                            r#"{"type":"Struct","typename":"return_struct::MapPoint","fields":{"u":{"type":"Prim","typename":"i64","value":"-22"},"v":{"type":"Prim","typename":"i64","value":"44"}}}"#,
+                        22 =>
+                            r#"{"type":"Struct","typename":"return_struct::Label","fields":{"s":{"type":"String","typename":"&str","value":"hello"}}}"#,
+                        24 =>
                             r#"{"type":"Struct","typename":"return_struct::Long","fields":{"0":{"type":"Prim","typename":"i128","value":"22222222222222222222"}}}"#,
-                        19 => r#"{"type":"Unit"}"#,
+                        25 => r#"{"type":"Unit"}"#,
                         i => panic!("Unexpected i {i}"),
                     }
                 );
