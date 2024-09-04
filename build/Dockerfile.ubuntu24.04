@@ -1,0 +1,39 @@
+# 1. Build the Docker image
+#    ```
+#    docker build --no-cache -t firedbg-ubuntu24.04 -f build/Dockerfile.ubuntu24.04 .
+#    # Or, keeping the full build log
+#    docker build --no-cache --progress plain -t firedbg-ubuntu24.04 -f build/Dockerfile.ubuntu24.04 .
+#    ```
+# 2. Start a Docker container and mount the directories to the container
+#    ```
+#    docker run --name firedbg-ubuntu24.04 --rm -it -v $(pwd):/FireDBG.for.Rust firedbg-ubuntu24.04
+#    ```
+# 3. Build release
+#    ```
+#    cd /FireDBG.for.Rust && sh build-tools/release-x86_64-ubuntu.sh
+#    ```
+
+FROM ubuntu:24.04
+
+# apt install without interactive dialogue
+ARG DEBIAN_FRONTEND=noninteractive
+
+# The following dependencies are required
+RUN apt update
+# Needed in `release.sh`
+RUN apt install curl unzip -y
+# Needed to build FireDBG executables and run self tests
+RUN apt install clang build-essential pkg-config libssl-dev -y
+RUN apt install liblldb-18 python3-lldb-18 libc++-dev libc++abi1-18 -y
+# Link c++ to `clang` instead of g++
+RUN update-alternatives --set c++ /usr/bin/clang++
+
+# Install Rust
+RUN curl https://sh.rustup.rs -sSf | sh -s -- --profile minimal -y
+ENV PATH "/root/.cargo/bin:$PATH"
+
+# Create symbolic links such that `cargo` and `lldb` can locate them
+RUN ln -s /usr/lib/x86_64-linux-gnu/liblldb-18.so.1 /usr/lib/x86_64-linux-gnu/liblldb.so
+
+# For unknown reason, if LLDB cannot locate `lldb-server`
+RUN export LLDB_DEBUGSERVER_PATH=/usr/lib/llvm-18/bin/lldb-server-18.0.0

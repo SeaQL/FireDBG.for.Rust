@@ -154,6 +154,9 @@ get_architecture() {
                     case "$_os_id_like" in
                         ubuntu*)
                             case "$_os_version_id" in
+                                24*) # Ubuntu Noble
+                                    local _ostype="ubuntu24.04"
+                                    ;;
                                 21*) # Ubuntu Jammy
                                     local _ostype="ubuntu22.04"
                                     ;;
@@ -168,6 +171,9 @@ get_architecture() {
                     esac
             esac
             case "$_ostype" in
+                ubuntu24*)
+                    check_apt_install libc++abi1-18
+                    ;;
                 ubuntu22*)
                     check_apt_install libc++abi1-15
                     ;;
