@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.81.0 - Pending
+## 1.81.0 - 2024-08-05
 
 ### Versions
 
