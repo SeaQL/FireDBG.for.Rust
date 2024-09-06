@@ -173,6 +173,7 @@ get_architecture() {
             case "$_ostype" in
                 ubuntu24*)
                     check_apt_install libc++abi1-18
+                    local _ostype="ubuntu22.04"
                     ;;
                 ubuntu22*)
                     check_apt_install libc++abi1-15
