@@ -52,8 +52,8 @@ main() {
     local _arch="$RETVAL"
     assert_nz "$_arch" "arch"
 
-    which rustup > /dev/null 2>&1
-    need_ok "failed to find Rust installation, is rustup installed?"
+    which rustc > /dev/null 2>&1
+    need_ok "failed to find Rust installation, is rust installed?"
 
     get_firedbg_version || return 1
     local _firedbg_version="$RETVAL"
