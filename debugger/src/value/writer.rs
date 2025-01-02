@@ -648,7 +648,7 @@ pub(crate) fn enumerate_value<'a>(
     Ok((parent, variant))
 }
 
-fn value_to_str<'a>(v: &'a SBValue) -> Result<&'a str> {
+fn value_to_str(v: &SBValue) -> Result<&str> {
     match v.value() {
         Some(s) => s.to_str().map_err(|_| WriteErr),
         None => Err(WriteErr),
@@ -680,7 +680,7 @@ where
     Ok(bytes)
 }
 
-impl<'a> RValueWriter<'a> {
+impl RValueWriter<'_> {
     fn pointer_to(&mut self, ty: &str, addr: u64, pointee: &SBType, r: usize) -> Result<Bytes> {
         let sb_value = sb_value_from_addr("0", addr, pointee)?;
         let addr = Addr::from(addr);

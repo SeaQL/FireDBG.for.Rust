@@ -512,7 +512,7 @@ impl Display for RValue {
 /// A wrapper type only for implementing `Display`.
 pub struct ArgumentList<'a>(pub &'a [(String, RValue)]);
 
-impl<'a> Display for ArgumentList<'a> {
+impl Display for ArgumentList<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let pretty = f.alternate();
         for (name, value) in self.0.iter() {

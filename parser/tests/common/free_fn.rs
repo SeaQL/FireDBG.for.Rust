@@ -38,7 +38,7 @@ mod module_a {
         }
 
         mod module_a_a_a {
-            fn free_func_f<'a>(i: &'a u64) -> &'a u64 {
+            fn free_func_f(i: &u64) -> &u64 {
                 i
             }
         }
