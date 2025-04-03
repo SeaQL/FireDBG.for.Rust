@@ -119,7 +119,7 @@ impl FunctionCache {
         self.cache.get(sb_fn_id)
     }
 
-    fn insert<'a, F>(&'a mut self, sb_fn_id: &SBFunctionId, get_type: F)
+    fn insert<F>(&mut self, sb_fn_id: &SBFunctionId, get_type: F)
     where
         F: FnOnce() -> SBType,
     {
